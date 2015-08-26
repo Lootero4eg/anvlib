@@ -1,0 +1,4 @@
+C:\Users\ankushin\Documents\Visual Studio 2012\Projects\anvlib\anvlib_crypt\bin\Debug\anvlib_crypt.dll
+C:\Users\ankushin\Documents\Visual Studio 2012\Projects\anvlib\anvlib_crypt\bin\Debug\anvlib_crypt.pdb
+C:\Users\ankushin\Documents\Visual Studio 2012\Projects\anvlib\anvlib_crypt\obj\Debug\anvlib_crypt.dll
+C:\Users\ankushin\Documents\Visual Studio 2012\Projects\anvlib\anvlib_crypt\obj\Debug\anvlib_crypt.pdb

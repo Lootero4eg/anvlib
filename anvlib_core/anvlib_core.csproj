@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D151E305-4950-482C-A05C-34E71E003CDD}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>anvlib</RootNamespace>
+    <AssemblyName>anvlib_core</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>anvlib_core.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Mono.Security, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\anvlib\References DLLs\Mono.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Npgsql">
+      <HintPath>..\anvlib\References DLLs\Npgsql.dll</HintPath>
+    </Reference>
+    <Reference Include="Oracle.DataAccess, Version=4.121.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\anvlib\References DLLs\Oracle.DataAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="anvlibInformation.cs" />
+    <Compile Include="Base\BaseCommonObject.cs" />
+    <Compile Include="Base\BaseCommonStruct.cs" />
+    <Compile Include="Base\BaseDbManager.cs" />
+    <Compile Include="Base\BaseMSSQLManager.cs" />
+    <Compile Include="Base\BaseOptions.cs" />
+    <Compile Include="Base\BaseOracleManager.cs" />
+    <Compile Include="Base\BasePlugin.cs" />
+    <Compile Include="Base\BasePostgresSQLManager.cs" />
+    <Compile Include="Base\Collections\BaseCommonCollection.cs" />
+    <Compile Include="Classes\ActionManager.cs" />
+    <Compile Include="Classes\AvailablePlugin.cs" />
+    <Compile Include="Network\MailNotifycator.cs" />
+    <Compile Include="Classes\PluginsService.NET.cs" />
+    <Compile Include="Classes\PrintMessageSystems\ConsolePrintMessageSystem.cs" />
+    <Compile Include="Enums\AddEditEnum.cs" />
+    <Compile Include="Enums\PresenterEnums.cs" />
+    <Compile Include="Interfaces\Collections\IBaseCommonCollection.cs" />
+    <Compile Include="Interfaces\IAction.cs" />
+    <Compile Include="Interfaces\IAddEditDeleteButtonsEvents.cs" />
+    <Compile Include="Interfaces\IBaseCommonObject.cs" />
+    <Compile Include="Interfaces\IBasePlugin.cs" />
+    <Compile Include="Interfaces\IBaseWrapper.cs" />
+    <Compile Include="Interfaces\IConnectionFormSettings.cs" />
+    <Compile Include="Interfaces\IDictionaryForm.cs" />
+    <Compile Include="Interfaces\IEditableItem.cs" />
+    <Compile Include="Interfaces\IPrintMessageSystem.cs" />
+    <Compile Include="Interfaces\ISetCaption.cs" />
+    <Compile Include="Interfaces\ISetConnection.cs" />
+    <Compile Include="Interfaces\ISetConnectionString.cs" />
+    <Compile Include="Interfaces\ISetGridControl.cs" />
+    <Compile Include="Interfaces\ISimpleSqlConnectionString.cs" />
+    <Compile Include="Interfaces\IUserGroupForm.cs" />
+    <Compile Include="Interfaces\Templates\ActionTemplate.cs" />
+    <Compile Include="Network\IPV4Helper.cs" />
+    <Compile Include="Network\PingSender.cs" />
+    <Compile Include="Network\UDP.cs" />
+    <Compile Include="Presenters\BaseChangableViewPresenter.cs" />
+    <Compile Include="Presenters\BaseDependableViewPresenter.cs" />
+    <Compile Include="Presenters\BasePresenter.cs" />
+    <Compile Include="Presenters\BaseSimplePresenter.cs" />
+    <Compile Include="Presenters\Classes\ChangableView.cs" />
+    <Compile Include="Presenters\Classes\PresentersEvents.cs" />
+    <Compile Include="Presenters\Classes\ViewsDependenceChain.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilites\ArgsParser.cs" />
+    <Compile Include="Utilites\AssemblyHelper.cs" />
+    <Compile Include="Utilites\ConfigManager.cs" />
+    <Compile Include="Utilites\DigitToTextConverter.cs" />
+    <Compile Include="Utilites\IOUtils.cs" />
+    <Compile Include="Utilites\Logs.cs" />
+    <Compile Include="Utilites\ObjectInspector.cs" />
+    <Compile Include="Utilites\ProcessManager.cs" />
+    <Compile Include="Utilites\SQLServerTableCreator.cs" />
+    <Compile Include="Utilites\ThreadsManager.cs" />
+    <Compile Include="Utilites\TypesHelper.cs" />
+    <Compile Include="Utilites\TypeSystem.cs" />
+    <Compile Include="Xml\XmlClassManager.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="References DLLs\Mono.Security.dll" />
+    <Content Include="References DLLs\Npgsql.dll" />
+    <Content Include="References DLLs\oci.dll" />
+    <Content Include="References DLLs\Oracle.DataAccess.dll" />
+    <Content Include="References DLLs\orannzsbb11.dll" />
+    <Content Include="References DLLs\oraociei11.dll" />
+    <Content Include="References DLLs\OraOps11w.dll" />
+    <Content Include="References DLLs\policy.2.0.Npgsql.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="anvlib_core.pfx" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

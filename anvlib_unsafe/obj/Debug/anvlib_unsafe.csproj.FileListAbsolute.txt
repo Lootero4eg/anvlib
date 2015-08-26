@@ -2,4 +2,3 @@ C:\Users\ankushin\Documents\Visual Studio 2012\Projects\anvlib\anvlib_unsafe\bin
 C:\Users\ankushin\Documents\Visual Studio 2012\Projects\anvlib\anvlib_unsafe\bin\Debug\anvlib_unsafe.pdb
 C:\Users\ankushin\Documents\Visual Studio 2012\Projects\anvlib\anvlib_unsafe\obj\Debug\anvlib_unsafe.dll
 C:\Users\ankushin\Documents\Visual Studio 2012\Projects\anvlib\anvlib_unsafe\obj\Debug\anvlib_unsafe.pdb
-C:\Users\ankushin\Documents\Visual Studio 2012\Projects\anvlib\anvlib_unsafe\obj\Debug\anvlib_unsafe.csprojResolveAssemblyReference.cache

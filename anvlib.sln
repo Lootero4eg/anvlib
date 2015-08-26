@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "anvlib", "anvlib\anvlib.csproj", "{060C007E-F397-4F80-AD41-8B52C5A31B54}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "anvlib_winforms", "anvlib_winforms\anvlib_winforms.csproj", "{060C007E-F397-4F80-AD41-8B52C5A31B54}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "anvlib_unsafe", "anvlib_unsafe\anvlib_unsafe.csproj", "{57548D2E-A229-4B46-AAB6-7EDE531D6B92}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "anvlib_reports", "anvlib_reports\anvlib_reports.csproj", "{1FBAC8C3-EA17-4430-9A28-515EB8791EA9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "anvlib_core", "anvlib_core\anvlib_core.csproj", "{D151E305-4950-482C-A05C-34E71E003CDD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "anvlib_crypt", "anvlib_crypt\anvlib_crypt.csproj", "{A3AC254B-91BA-4C9E-A44D-1FFDFF89D12C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,6 +29,14 @@ Global
 		{1FBAC8C3-EA17-4430-9A28-515EB8791EA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1FBAC8C3-EA17-4430-9A28-515EB8791EA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1FBAC8C3-EA17-4430-9A28-515EB8791EA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D151E305-4950-482C-A05C-34E71E003CDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D151E305-4950-482C-A05C-34E71E003CDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D151E305-4950-482C-A05C-34E71E003CDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D151E305-4950-482C-A05C-34E71E003CDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3AC254B-91BA-4C9E-A44D-1FFDFF89D12C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3AC254B-91BA-4C9E-A44D-1FFDFF89D12C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3AC254B-91BA-4C9E-A44D-1FFDFF89D12C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3AC254B-91BA-4C9E-A44D-1FFDFF89D12C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
