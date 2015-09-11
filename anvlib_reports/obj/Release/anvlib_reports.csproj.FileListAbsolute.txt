@@ -1,9 +1,0 @@
-c:\Users\ankushin\Documents\Visual Studio 2012\Projects\anvlib\anvlib_reports\bin\Release\anvlib_reports.dll
-c:\Users\ankushin\Documents\Visual Studio 2012\Projects\anvlib\anvlib_reports\bin\Release\anvlib_reports.pdb
-c:\Users\ankushin\Documents\Visual Studio 2012\Projects\anvlib\anvlib_reports\obj\Release\anvlib_reports.csprojResolveAssemblyReference.cache
-c:\Users\ankushin\Documents\Visual Studio 2012\Projects\anvlib\anvlib_reports\obj\Release\anvlib_reports.dll
-c:\Users\ankushin\Documents\Visual Studio 2012\Projects\anvlib\anvlib_reports\obj\Release\anvlib_reports.pdb
-C:\Users\ankushin\Documents\Visual Studio 2012\Projects\anvlib\anvlib_reports\bin\Release\EPPlus.dll
-C:\Users\ankushin\Documents\Visual Studio 2012\Projects\anvlib\anvlib_reports\bin\Release\EPPlus.xml
-C:\Users\ankushin\Documents\Visual Studio 2012\Projects\anvlib\anvlib_reports\bin\Release\anvlib.dll
-C:\Users\ankushin\Documents\Visual Studio 2012\Projects\anvlib\anvlib_reports\bin\Release\anvlib.pdb
