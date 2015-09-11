@@ -7,6 +7,8 @@ using System.IO;
 
 namespace anvlib.Utilites
 {
+    public enum FileSizeExceededEnum { DisableWriting, ThrowException, RewriteFile }
+
     /// <summary>
     /// Класс для лог файлов
     /// </summary>
@@ -14,6 +16,12 @@ namespace anvlib.Utilites
     {
         private static TextWriter log;
         private string path = string.Empty;
+        private bool _isWriteTimeStamp = true;
+        private string _dateTimeFormatString = "dd.mm.yyyy hh:mm:ss";
+        private bool _isConsoleOutputEnabled = true;
+        private double _maxLogFileSizeInMB = 0;//--Неограничено
+        private FileSizeExceededEnum _fileSizeExceededAction = FileSizeExceededEnum.DisableWriting;//--Этот параметр работает исключительно с _maxLogFileSizeInMB > 0
+        private bool _isFileSizeExceeded = false;
 
         /// <summary>
         /// Конструктор
@@ -36,17 +44,87 @@ namespace anvlib.Utilites
             try
             {
                 if (!File.Exists(path))
+                {
+                    if (!Directory.Exists(Path.GetDirectoryName(path)))
+                        Directory.CreateDirectory(Path.GetDirectoryName(path));
                     log = new StreamWriter(path);
+                }
                 else
-                    log = File.AppendText(path);
+                {
+                    if (_maxLogFileSizeInMB > 0)
+                    {
+                        FileInfo fi = new FileInfo(path);
+                        if (fi.Length > 0)
+                        {
+                            double fsize = (double)(fi.Length / 1024) / 1024;
+                            if (fsize > _maxLogFileSizeInMB)
+                            {
+                                switch (_fileSizeExceededAction)
+                                {
+                                    case FileSizeExceededEnum.DisableWriting:
+                                        _isFileSizeExceeded = true;
+                                        return true;
+                                    case FileSizeExceededEnum.ThrowException:
+                                        throw new Exception("Size of log file is exceeded. See MaxLogFileSizeInMB Properrty.");
+                                    case FileSizeExceededEnum.RewriteFile:
+                                        log = new StreamWriter(fi.Open(FileMode.Truncate));
+                                        break;
+                                }
+                            }
+                            else
+                                log = File.AppendText(path);
+                        }
+                    }
+                    else
+                        log = File.AppendText(path);
+                }
 
                 return true;
             }
-            catch
+            catch(Exception ex)
             {
-                return false;
+                if (ex.Message == "Size of log file is exceeded. See MaxLogFileSizeInMB Properrty.")
+                    throw ex;
+                else
+                    return false;
             }
         }
+
+        /// <summary>
+        /// Максимальный размер лог файла в мегабайтах
+        /// </summary>
+        public double MaxLogFileSizeInMB
+        {
+            get { return _maxLogFileSizeInMB; }
+            set { _maxLogFileSizeInMB = value; }
+        }
+
+        /// <summary>
+        /// Флаг, узывающий что делать в случае превышения размера лог файла
+        /// </summary>
+        public FileSizeExceededEnum FileSizeExceededAction
+        {
+            get { return _fileSizeExceededAction; }
+            set { _fileSizeExceededAction = value; }
+        }
+
+        /// <summary>
+        /// Флаг, по которому определяется писать ли в лог дату и время каждой записи.
+        /// По умолчанию он включен.
+        /// </summary>
+        public bool IsWriteTimeStamp { get { return _isWriteTimeStamp; } set { _isWriteTimeStamp = value; } }
+
+        /// <summary>
+        /// Формат даты и времени.
+        /// По умолчанию "dd.mm.yyyy hh:mm:ss", можно менять по своему усмотрению
+        /// </summary>
+        public string DateTimeFormatString { get { return _dateTimeFormatString; } set { _dateTimeFormatString = value; } }
+
+        /// <summary>
+        /// Флаг, разрешающий выводить записываемую в лог строку в консоль.
+        /// По умолчанию он включен.
+        /// </summary>
+        public bool IsConsoleOutputEnabled { get { return _isConsoleOutputEnabled; } set { _isConsoleOutputEnabled = value; } }        
 
         /// <summary>
         /// Метод записывающий сразу несколько строк в файл
@@ -62,10 +140,20 @@ namespace anvlib.Utilites
             while (!CanWrite())
             { }
 
+            if (_isFileSizeExceeded)
+                return;
+
             foreach (var line in Lines)
             {
-                log.WriteLine(DateTime.Now.ToString() + ": " + line);
-                Console.WriteLine(DateTime.Now.ToString() + ": " + line);
+                string linetext = "";
+                if (_isWriteTimeStamp)
+                    linetext = string.Format("{0}: {1}", DateTime.Now.ToString(_dateTimeFormatString), line);
+                else
+                    linetext = line;
+
+                log.WriteLine(linetext);
+                if (_isConsoleOutputEnabled)
+                    Console.WriteLine(linetext);
             }
             log.Close();
         }
@@ -83,13 +171,24 @@ namespace anvlib.Utilites
             while (!CanWrite())
             { }
 
+            if (_isFileSizeExceeded)
+                return;
+
             try
             {
-                log.WriteLine(DateTime.Now.ToString() + ": " + msg);
-                Console.WriteLine(DateTime.Now.ToString() + ": " + msg);
-                log.Close(); log.Flush();
+                string linetext = "";
+                if (_isWriteTimeStamp)
+                    linetext = string.Format("{0}: {1}", DateTime.Now.ToString(_dateTimeFormatString), msg);
+                else
+                    linetext = msg;
+
+                log.WriteLine(linetext);
+                if (_isConsoleOutputEnabled)
+                    Console.WriteLine(linetext);
+                
+                log.Close();
             }
-            catch { }
+            catch { } //--нафигу тут сделал кэтч, если не проверяешь ничего... надо будет убрать
         }
 
         /// <summary>
@@ -128,6 +227,20 @@ namespace anvlib.Utilites
             lines.AddRange(Lines);
 
             WriteMultipleRows(lines);
+        }
+
+        /// <summary>
+        /// Метод очищающий лог файл
+        /// </summary>
+        public void ClearLogData()
+        {
+            if (CanWrite())
+            {
+                log.Close();
+                File.Delete(path);
+                log = new StreamWriter(path);
+                log.Close();
+            }
         }
     }
 }
