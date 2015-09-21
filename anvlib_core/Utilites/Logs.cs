@@ -17,7 +17,7 @@ namespace anvlib.Utilites
         private static TextWriter log;
         private string path = string.Empty;
         private bool _isWriteTimeStamp = true;
-        private string _dateTimeFormatString = "dd.mm.yyyy hh:mm:ss";
+        private string _dateTimeFormatString = "dd.MM.yyyy HH:mm:ss";
         private bool _isConsoleOutputEnabled = true;
         private double _maxLogFileSizeInMB = 0;//--Неограничено
         private FileSizeExceededEnum _fileSizeExceededAction = FileSizeExceededEnum.DisableWriting;//--Этот параметр работает исключительно с _maxLogFileSizeInMB > 0

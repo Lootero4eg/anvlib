@@ -36,7 +36,7 @@ namespace anvlib.Utilites
                     else if (table.Columns[i].DataType.ToString().Contains("System.Byte"))
                         sqlsc += " tinyint ";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Int16"))
-                        sqlsc += " tinyint ";
+                        sqlsc += " int ";
                     else
                         sqlsc += " varchar(" + (table.Columns[i].MaxLength > -1 ? table.Columns[i].MaxLength.ToString() : "50") + ") ";
 

@@ -43,10 +43,6 @@
     <AssemblyOriginatorKeyFile>anvlib_winforms.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="anvlib_core, Version=0.8.0.19403, Culture=neutral, PublicKeyToken=d5dc30706c280068, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\anvlib_core\bin\Debug\anvlib_core.dll</HintPath>
-    </Reference>
     <Reference Include="anvlib_crypt, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f1eeb136ebb95dbb, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\anvlib_crypt\bin\Debug\anvlib_crypt.dll</HintPath>
@@ -269,6 +265,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\anvlib_core\anvlib_core.csproj">
+      <Project>{d151e305-4950-482c-a05c-34e71e003cdd}</Project>
+      <Name>anvlib_core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
