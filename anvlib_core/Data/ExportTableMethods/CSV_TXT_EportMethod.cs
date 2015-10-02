@@ -19,6 +19,9 @@ namespace anvlib.Data.ExportTableMethods
         private char _delimeter = ',';
         private bool _is_string_quoted = false;
 
+        public event EventHandler ExportComplete;
+        public event EventHandler ExportException;
+
         public CSV_TXT_EportMethod(string filename)
         {
             _fname = filename;
@@ -48,10 +51,23 @@ namespace anvlib.Data.ExportTableMethods
         /// <param name="additionaldata"></param>
         public void Export(DataTable table)
         {
-            writer = new CSV_TXT_TableWriter(_fname);
-            writer.SetDelimeter(_delimeter);
-            writer.IsStringColumnsQuoted = _is_string_quoted;
-            writer.WriteTableToFile(table);
+            try
+            {
+                writer = new CSV_TXT_TableWriter(_fname);
+                writer.SetDelimeter(_delimeter);
+                writer.IsStringColumnsQuoted = _is_string_quoted;
+                writer.WriteTableToFile(table);
+
+                if (ExportComplete != null)
+                    ExportComplete(this, new EventArgs());
+            }
+            catch (Exception e)
+            {
+                if (ExportException != null)
+                    ExportException(e, new EventArgs());
+                else
+                    throw e;
+            }
         }
     }
 }

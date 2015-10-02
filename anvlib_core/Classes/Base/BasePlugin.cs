@@ -5,7 +5,7 @@ using System.Text;
 
 using anvlib.Interfaces;
 
-namespace anvlib.Base
+namespace anvlib.Classes.Base
 {
     /// <summary>
     /// Базовый класс для любых типов плагинов

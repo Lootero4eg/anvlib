@@ -63,12 +63,7 @@
     <Content Include="libraries\EPPlus.dll" />
     <Content Include="libraries\EPPlus.XML" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\anvlib_core\anvlib_core.csproj">
-      <Project>{d151e305-4950-482c-a05c-34e71e003cdd}</Project>
-      <Name>anvlib_core</Name>
-    </ProjectReference>
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

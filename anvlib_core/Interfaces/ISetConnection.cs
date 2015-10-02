@@ -4,8 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Data.Common;
 
-using anvlib.Base;
-
 namespace anvlib.Interfaces
 {
     /// <summary>

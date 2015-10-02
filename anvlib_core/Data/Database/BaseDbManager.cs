@@ -6,9 +6,12 @@ using System.Text;
 using System.Data;
 using System.Data.Common;
 
+using anvlib.Enums;
 using anvlib.Interfaces;
+using anvlib.Classes.PrintMessageSystems;
+using anvlib.Classes.Attributes;
 
-namespace anvlib.Base
+namespace anvlib.Data.Database
 {
     /// <summary>
     /// Этот класс нужен только для других базовых классов
@@ -41,9 +44,21 @@ namespace anvlib.Base
         #region BaseDbManager Properties & Methods
 
         /// <summary>
-        /// Конструктор класс
+        /// Конструктор класса
         /// </summary>
-        public BaseDbManager(){ }        
+        public BaseDbManager()
+        {
+            MessagePrinter = new ExceptionPrintMessageSystem();
+        }
+
+        /// <summary>
+        /// Конструктор класса
+        /// </summary>
+        /// <param name="msg_system">Система оповещения об ошибке</param>
+        public BaseDbManager(IPrintMessageSystem msg_system)
+        {
+            MessagePrinter = msg_system;
+        }
 
         /// <summary>
         /// Состоянние "Соединения с сервером"
@@ -145,21 +160,21 @@ namespace anvlib.Base
         /// </summary>
         /// <param name="SQLText">Текст запроса</param>
         /// <returns></returns>
-        public abstract DbDataAdapter CreateDataAdapter(string SQLText);
+        protected abstract DbDataAdapter CreateDataAdapter(string SQLText);
         
         /// <summary>
         /// Метод создание DbDataAdapter-а
         /// </summary>
         /// <param name="cmd">Команда которая будет заполнять DbDataAdapter</param>
         /// <returns></returns>
-        public abstract DbDataAdapter CreateDataAdapter(DbCommand cmd);
+        protected abstract DbDataAdapter CreateDataAdapter(DbCommand cmd);
 
         /// <summary>
         /// Метод создания DbCommand
         /// </summary>
         /// <param name="CmdText">Текст запроса или имя хранимой процедуры</param>
         /// <returns></returns>
-        public abstract DbCommand CreateCommand(string CmdText);
+        protected abstract DbCommand CreateCommand(string CmdText);
 
         /// <summary>
         /// Метод создание параметра для хранимых процедур
@@ -168,7 +183,35 @@ namespace anvlib.Base
         /// <param name="ParType">Тип параметра</param>
         /// <param name="ParSize">Размер параметра. Для строковых параметров и параметров с плавающей точкой</param>
         /// <returns></returns>
-        public abstract DbParameter CreateParameter(string ParName, DbType ParType, int ParSize);
+        protected abstract DbParameter CreateParameter(string ParName, DbType ParType, int ParSize);
+
+        /// <summary>
+        /// Метод создание таблицы
+        /// </summary>
+        /// <param name="table">Таблица в формате DataTable</param>
+        [Experimental]
+        public abstract void CreateTable(DataTable table);
+        
+        /// <summary>
+        /// Метод стирания таблицы из базы данных или схемы
+        /// </summary>
+        /// <param name="TableName"></param>        
+        [Experimental]
+        public virtual void DropTable(string TableName)
+        {
+            string sql = string.Format("DROP TABLE {0};", TableName);
+            ExecuteCommand(CreateCommand(sql).ExecuteNonQuery);
+        }
+
+        /// <summary>
+        /// Метод проверки существование объекта
+        /// </summary>
+        /// <param name="obj_name"></param>
+        /// <param name="obj_type"></param>
+        /// <param name="CaseSensivity"></param>
+        /// <returns></returns>
+        [Experimental]
+        public abstract bool IsObjectExists(string obj_name, DataBaseObjects obj_type, bool CaseSensivity);
 
         /// <summary>
         /// Метод начинающий транзакцию.       

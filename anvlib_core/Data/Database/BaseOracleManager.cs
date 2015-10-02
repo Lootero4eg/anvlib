@@ -9,7 +9,10 @@ using System.Data.Common;
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
 
-namespace anvlib.Base
+using anvlib.Enums;
+using anvlib.Interfaces;
+
+namespace anvlib.Data.Database
 {
     /// <summary>
     /// Базовый класс для серверов на базе Oracle 8-11
@@ -23,6 +26,18 @@ namespace anvlib.Base
             : base()
         { 
             _open_bracket='"';
+            _close_bracket = '"';
+            _parameters_prefix = ":";
+        }
+
+        /// <summary>
+        /// Конструктор
+        /// </summary>
+        /// <param name="msg_system"></param>
+        public BaseOracleManager(IPrintMessageSystem msg_system)
+            : base(msg_system)
+        {
+            _open_bracket = '"';
             _close_bracket = '"';
             _parameters_prefix = ":";
         }
@@ -80,7 +95,7 @@ namespace anvlib.Base
         /// </summary>
         /// <param name="CmdText">Текст запроса или имя хранимой процедуры</param>
         /// <returns></returns>
-        public override DbCommand CreateCommand(string CmdText)
+        protected override DbCommand CreateCommand(string CmdText)
         {
             _cmd = new OracleCommand(CmdText, (OracleConnection)_conn);
             return _cmd;
@@ -91,7 +106,7 @@ namespace anvlib.Base
         /// </summary>
         /// <param name="SQLText">Текст запроса</param>
         /// <returns></returns>
-        public override DbDataAdapter CreateDataAdapter(string SQLText)
+        protected override DbDataAdapter CreateDataAdapter(string SQLText)
         {
             _DA = new OracleDataAdapter(SQLText, (OracleConnection)_conn);
             return _DA;
@@ -102,7 +117,7 @@ namespace anvlib.Base
         /// </summary>
         /// <param name="cmd">Команда которая будет заполнять DbDataAdapter</param>
         /// <returns></returns>
-        public override DbDataAdapter CreateDataAdapter(DbCommand cmd)
+        protected override DbDataAdapter CreateDataAdapter(DbCommand cmd)
         {
             _DA = new OracleDataAdapter((OracleCommand)_cmd);
             return _DA;
@@ -115,7 +130,7 @@ namespace anvlib.Base
         /// <param name="ParType">Тип параметра</param>
         /// <param name="ParSize">Размер параметра. Для строковых параметров и параметров с плавающей точкой</param>
         /// <returns></returns>
-        public override DbParameter CreateParameter(string ParName, DbType ParType, int ParSize)
+        protected override DbParameter CreateParameter(string ParName, DbType ParType, int ParSize)
         {
             #region Types Convert
             OracleDbType tmpType = OracleDbType.Int32;
@@ -194,6 +209,16 @@ namespace anvlib.Base
             }
 
             return null;
+        }
+
+        public override void CreateTable(DataTable table) 
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool IsObjectExists(string obj_name, DataBaseObjects obj_type, bool CaseSensivity)
+        {
+            throw new NotImplementedException();
         }
 
         protected override void CreateLogin(string UserName, string Paswword, string AdditionalOptions)

@@ -5,11 +5,11 @@ using System.Text;
 using System.Collections;
 using System.Collections.ObjectModel;
 
-using anvlib.Base;
+using anvlib.Classes.Base;
 using anvlib.Interfaces;
 using anvlib.Interfaces.Collections;
 
-namespace anvlib.Base.Collections
+namespace anvlib.Classes.Base.Collections
 {
     /// <summary>
     /// Базовая коллекция стандартных объектов

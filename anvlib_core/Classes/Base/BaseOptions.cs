@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 using System.Reflection;
 
-namespace anvlib.Base
+namespace anvlib.Classes.Base
 {
     /// <summary>
     /// Класс опций для PropertyGrid-а

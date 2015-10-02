@@ -72,7 +72,7 @@ namespace anvlib.Forms
 
         private void OkB_Click(object sender, EventArgs e)
         {
-            _conn_str = anvlib.Base.BaseMSSQLManager.GetConnectionString(ServerNameE.Text, LoginE.Text, PasswordE.Text, _dbcatalog, false, _app_name);
+            _conn_str = anvlib.Data.Database.BaseMSSQLManager.GetConnectionString(ServerNameE.Text, LoginE.Text, PasswordE.Text, _dbcatalog, false, _app_name);
             SqlConnection conn = new SqlConnection(_conn_str);
             try
             {

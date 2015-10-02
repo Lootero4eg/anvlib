@@ -5,8 +5,6 @@ using System.Text;
 using System.Windows.Forms;
 
 using anvlib.Classes;
-using anvlib.Base;
-using anvlib.Base.Collections;
 using anvlib.Interfaces;
 using anvlib.Interfaces.Collections;
 using anvlib.Enums;
