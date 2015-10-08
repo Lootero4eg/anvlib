@@ -54,6 +54,10 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.SQLite">
+      <HintPath>..\..\LIBRARIES\sqlite-netFx40-binary-bundle-Win32-2010-1.0.98.0\System.Data.SQLite.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
@@ -77,6 +81,7 @@
     <Compile Include="Classes\AvailablePlugin.cs" />
     <Compile Include="Classes\PrintMessageSystems\ExceptionPrintMessageSystem.cs" />
     <Compile Include="Data\CSV_TXT_TableWriter.cs" />
+    <Compile Include="Data\Database\BaseSQLiteManager.cs" />
     <Compile Include="Data\DataTableCreator.cs" />
     <Compile Include="Data\DTC_Column.cs" />
     <Compile Include="Data\ExportTableMethods\Database_EportMethod.cs" />

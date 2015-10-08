@@ -38,7 +38,7 @@ namespace anvlib.Data.ExportTableMethods
                 //--пока так, но лучше всетаки сделать еще и апдейт в будущем!
                 try
                 {
-                    if (!sqlmgr.IsObjectExists(table.TableName, DataBaseObjects.table, true))
+                    if (!sqlmgr.IsDBObjectExists(table.TableName, DataBaseObjects.table, true))
                         sqlmgr.CreateTable(table);
                     else
                     {

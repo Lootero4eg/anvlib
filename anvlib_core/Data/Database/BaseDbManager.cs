@@ -34,6 +34,7 @@ namespace anvlib.Data.Database
         protected string _parameters_prefix;//--префикс для параметров, в MySQL и MSSQL отличаются, возможно в оракле тоже
         protected string _TransactionStartCmd;//--команда начала транзакции
         protected string _TransactionEndCmd;//--комнад окончания транзакции
+        protected string _connectionString;//--строка соединения
         protected char _open_bracket;//--для избежания проблем с системными полями
         protected char _close_bracket;//--для избежания проблем с системными полями
 
@@ -211,7 +212,7 @@ namespace anvlib.Data.Database
         /// <param name="CaseSensivity"></param>
         /// <returns></returns>
         [Experimental]
-        public abstract bool IsObjectExists(string obj_name, DataBaseObjects obj_type, bool CaseSensivity);
+        public abstract bool IsDBObjectExists(string obj_name, DataBaseObjects obj_type, bool CaseSensivity);
 
         /// <summary>
         /// Метод начинающий транзакцию.       
@@ -220,7 +221,7 @@ namespace anvlib.Data.Database
         public void BeginTransaction()
         {
             if (Connected)
-                _transaction = _conn.BeginTransaction();
+                _transaction = _conn.BeginTransaction(IsolationLevel.ReadCommitted);
             else
                 throw new Exception("Соединение с базой данных не инициализировано!");
         }

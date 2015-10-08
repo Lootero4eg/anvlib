@@ -47,6 +47,7 @@ namespace anvlib.Data.Database
         /// <param name="ConnectionString">Строка инициализации</param>
         public override void Connect(string ConnectionString)
         {
+            _connectionString = ConnectionString;
             _conn = new SqlConnection(ConnectionString);
             try
             {
@@ -183,7 +184,10 @@ namespace anvlib.Data.Database
             if (CmdText != null && CmdText.Length > 0)
                 if (CmdText.Split(' ').Length == 1)
                     tmpCmd.CommandType = CommandType.StoredProcedure;
-            
+
+            if (_transaction != null)
+                tmpCmd.Transaction = _transaction;
+
             return tmpCmd;
         }
 
@@ -266,6 +270,10 @@ namespace anvlib.Data.Database
             return tmpPar;
         }
 
+        /// <summary>
+        /// Обертка для выполнения DbCommand
+        /// </summary>
+        /// <param name="proc"></param>
         protected override void ExecuteCommand(ExecuteCmdDelegate proc)
         {
             try
@@ -281,6 +289,10 @@ namespace anvlib.Data.Database
             }
         }
 
+        /// <summary>
+        /// Обертка для выполнения DbCommand.ExecuteScalar
+        /// </summary>
+        /// <param name="proc"></param>
         protected override object ExecuteScalarCommand(ExecuteScalarCmdDelegate proc)
         {
             try
@@ -298,6 +310,10 @@ namespace anvlib.Data.Database
             return null;
         }
 
+        /// <summary>
+        /// Обертка для выполнения DbCommand.ExecuteReader
+        /// </summary>
+        /// <param name="proc"></param>
         protected override DbDataReader ExecuteDataReader(ExecuteDataReaderCmdDelegate proc)
         {
             try
@@ -415,7 +431,7 @@ namespace anvlib.Data.Database
             }
         }
 
-        public override bool IsObjectExists(string obj_name, DataBaseObjects obj_type, bool CaseSensivity)
+        public override bool IsDBObjectExists(string obj_name, DataBaseObjects obj_type, bool CaseSensivity)
         {            
             if (Connected)
             {

@@ -207,7 +207,7 @@ namespace anvlib.Data.Database
             throw new NotImplementedException();
         }
 
-        public override bool IsObjectExists(string obj_name, DataBaseObjects obj_type, bool CaseSensivity)
+        public override bool IsDBObjectExists(string obj_name, DataBaseObjects obj_type, bool CaseSensivity)
         {
             throw new NotImplementedException();
         }

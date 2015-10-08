@@ -182,9 +182,55 @@ namespace anvlib.Utilites
         /// <param name="old_fn"></param>
         /// <param name="new_fn"></param>
         public static void RenameFile(string old_fn, string new_fn)
-        {
-            //FileInfo file = new FileInfo(old_fn);
+        {            
             File.Move(old_fn, new_fn);
+        }
+
+        /// <summary>
+        /// Метод переименования директории
+        /// </summary>
+        /// <param name="old_dr"></param>
+        /// <param name="new_dr"></param>
+        public static void RenameDirectory(string old_dr, string new_dr)
+        {            
+            Directory.Move(old_dr, new_dr);
+        }
+
+        /// <summary>
+        /// Метод возвращающий все имена файлов заданной директории
+        /// </summary>
+        /// <param name="dir_path">Путь до директории с файлами</param>
+        /// <returns></returns>
+        public static List<string> GetDirectoryFilesList(string dir_path)
+        {
+            List<string> res = new List<string>();
+
+            DirectoryInfo di = new DirectoryInfo(dir_path);
+            var files = di.GetFiles();
+
+            foreach (var file in files)
+                res.Add(file.Name);
+
+            return res;
+        }
+
+        /// <summary>
+        /// Метод возвращающий все имена файлов заданной директории
+        /// </summary>
+        /// <param name="dir_path">Путь до директории с файлами</param>
+        /// <param name="file_pattern">можно задать макску поиска</param>
+        /// <returns></returns>
+        public static List<string> GetDirectoryFilesList(string dir_path, string file_pattern)
+        {
+            List<string> res = new List<string>();
+
+            DirectoryInfo di = new DirectoryInfo(dir_path);
+            var files = di.GetFiles(file_pattern);
+
+            foreach (var file in files)
+                res.Add(file.Name);
+
+            return res;
         }
     }
 }
