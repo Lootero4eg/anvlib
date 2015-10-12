@@ -274,7 +274,13 @@ namespace anvlib_reports.Classes
         public static void SetPageCenterHeader(string text)
         {
             if (workSheet != null)
-                workSheet.PageSetup.CenterHeader = text;
+                workSheet.PageSetup.CenterHeader = text;            
+        }
+
+        public static void SetPageLeftFooter(string text)
+        {
+            if (workSheet != null)
+                workSheet.PageSetup.LeftFooter = text;            
         }
 
         /// <summary>

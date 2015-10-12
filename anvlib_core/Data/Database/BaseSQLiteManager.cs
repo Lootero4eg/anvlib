@@ -26,7 +26,7 @@ namespace anvlib.Data.Database
         {             
             _open_bracket='"';
             _close_bracket = '"';
-            _parameters_prefix = ""; //--Параметров тут по определению нет
+            _parameters_prefix = "@";
         }
 
         /// <summary>
@@ -164,32 +164,32 @@ namespace anvlib.Data.Database
                 {
                     sqlsc += "\n" + table.Columns[i].ColumnName;
                     if (table.Columns[i].DataType.ToString().Contains("System.Int32"))
-                        sqlsc += " integer ";
+                        sqlsc += " integer";
                     else if (table.Columns[i].DataType.ToString().Contains("System.DateTime"))
-                        sqlsc += " text ";
+                        sqlsc += " text";
                     else if (table.Columns[i].DataType.ToString().Contains("System.String"))
-                        sqlsc += " text ";
+                        sqlsc += " text";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Single"))
-                        sqlsc += " integer ";
+                        sqlsc += " integer";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Double"))
-                        sqlsc += " real ";
+                        sqlsc += " real";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Guid"))
-                        sqlsc += " text ";
+                        sqlsc += " text";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Boolean"))
-                        sqlsc += " integer ";
+                        sqlsc += " integer";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Byte"))
-                        sqlsc += " integer ";
+                        sqlsc += " integer";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Int16"))
-                        sqlsc += " integer ";
+                        sqlsc += " integer";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Byte[]"))
-                        sqlsc += " blob ";
+                        sqlsc += " blob";
                     else
-                        sqlsc += " text ";
+                        sqlsc += " text";
 
 
 
                     if (table.Columns[i].AutoIncrement)
-                        sqlsc += " AUTOINCREMENT(" + table.Columns[i].AutoIncrementSeed.ToString() + "," + table.Columns[i].AutoIncrementStep.ToString() + ") ";
+                        sqlsc += " AUTOINCREMENT(" + table.Columns[i].AutoIncrementSeed.ToString() + "," + table.Columns[i].AutoIncrementStep.ToString() + ")";
                     if (!table.Columns[i].AllowDBNull)
                         sqlsc += " NOT NULL ";
                     sqlsc += ",";
@@ -204,7 +204,7 @@ namespace anvlib.Data.Database
                     }
                     pks = pks.Substring(0, pks.Length - 1) + ")";
                     sqlsc += pks;
-                    sqlsc = sqlsc + ");";
+                    sqlsc = sqlsc + ")";
                 }
                 else
                     sqlsc = sqlsc.Substring(0, sqlsc.Length - 1) + ");";
@@ -213,22 +213,7 @@ namespace anvlib.Data.Database
 
                 if (_last_error == 0)//--Если табличка успешно создана, то надо ее заполнить 
                 {
-                    string insert_sql = string.Format("insert into {0} values(", table.TableName);
-                    Array insert_params = new DbParameter[table.Columns.Count];
-                    for (int i = 0; i < table.Columns.Count; i++)
-                    {
-                        insert_sql = string.Format("{0}@{1}", insert_sql, table.Columns[i].ColumnName + (i + 1 != table.Columns.Count ? "," : ");"));
-                        DbParameter par = CreateParameter(string.Format("@{0}", table.Columns[i].ColumnName), Utilites.SystemTypeToDbTypeConverter.Convert(table.Columns[i].DataType), table.Columns[i].MaxLength);
-                        par.SourceColumn = table.Columns[i].ColumnName;
-                        insert_params.SetValue(par, i);
-                    }
-
-                    _DA = new SQLiteDataAdapter();
-                    var ins_cmd = CreateCommand(insert_sql);
-                    ins_cmd.Parameters.AddRange(insert_params);
-
-                    _DA.InsertCommand = ins_cmd;
-                    _DA.Update(table);
+                    InsertDataToDb(table, _parameters_prefix);
                 }
             }
             else

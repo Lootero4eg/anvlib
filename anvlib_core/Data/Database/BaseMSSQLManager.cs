@@ -39,6 +39,7 @@ namespace anvlib.Data.Database
             _open_bracket = '[';
             _close_bracket = ']';
             _parameters_prefix = "@";
+            _owner = "dbo";
         }
 
         /// <summary>
@@ -359,30 +360,29 @@ namespace anvlib.Data.Database
                 {
                     sqlsc += "\n" + table.Columns[i].ColumnName;
                     if (table.Columns[i].DataType.ToString().Contains("System.Int32"))
-                        sqlsc += " int ";
+                        sqlsc += " int";
                     else if (table.Columns[i].DataType.ToString().Contains("System.DateTime"))
-                        sqlsc += " datetime ";
+                        sqlsc += " datetime";
                     else if (table.Columns[i].DataType.ToString().Contains("System.String"))
-                        sqlsc += " varchar(" + (table.Columns[i].MaxLength > -1 ? table.Columns[i].MaxLength.ToString() : "50") + ") ";
+                        sqlsc += " varchar(" + (table.Columns[i].MaxLength > -1 ? table.Columns[i].MaxLength.ToString() : "50") + ")";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Single"))
-                        sqlsc += " single ";
+                        sqlsc += " single";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Double"))
-                        sqlsc += " double ";
+                        sqlsc += " double";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Guid"))
-                        sqlsc += " uniqueidentifier ";
+                        sqlsc += " uniqueidentifier";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Boolean"))
-                        sqlsc += " bit ";
+                        sqlsc += " bit";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Byte"))
-                        sqlsc += " tinyint ";
+                        sqlsc += " tinyint";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Int16"))
-                        sqlsc += " int ";
+                        sqlsc += " int";
                     else
-                        sqlsc += " varchar(" + (table.Columns[i].MaxLength > -1 ? table.Columns[i].MaxLength.ToString() : "50") + ") ";
-
+                        sqlsc += " varchar(" + (table.Columns[i].MaxLength > -1 ? table.Columns[i].MaxLength.ToString() : "50") + ")";
 
 
                     if (table.Columns[i].AutoIncrement)
-                        sqlsc += " IDENTITY(" + table.Columns[i].AutoIncrementSeed.ToString() + "," + table.Columns[i].AutoIncrementStep.ToString() + ") ";
+                        sqlsc += " IDENTITY(" + table.Columns[i].AutoIncrementSeed.ToString() + "," + table.Columns[i].AutoIncrementStep.ToString() + ")";
                     if (!table.Columns[i].AllowDBNull)
                         sqlsc += " NOT NULL ";
                     sqlsc += ",";
@@ -403,26 +403,9 @@ namespace anvlib.Data.Database
                     sqlsc = sqlsc.Substring(0, sqlsc.Length - 1) + ");";
 
                 ExecuteCommand(CreateCommand(sqlsc).ExecuteNonQuery);
-                
-                if (_last_error == 0)//--Если табличка успешно создана, то надо ее заполнить 
-                {
-                    string insert_sql = string.Format("insert into {0} values(", table.TableName);
-                    Array insert_params = new DbParameter[table.Columns.Count];
-                    for (int i = 0; i < table.Columns.Count; i++)
-                    {
-                        insert_sql = string.Format("{0}@{1}", insert_sql, table.Columns[i].ColumnName + (i + 1 != table.Columns.Count ? "," : ");"));
-                        DbParameter par = CreateParameter(string.Format("@{0}", table.Columns[i].ColumnName), Utilites.SystemTypeToDbTypeConverter.Convert(table.Columns[i].DataType), table.Columns[i].MaxLength);
-                        par.SourceColumn = table.Columns[i].ColumnName;                        
-                        insert_params.SetValue(par, i);
-                    }
-                     
-                    _DA = new SqlDataAdapter();
-                    var ins_cmd = CreateCommand(insert_sql);
-                    ins_cmd.Parameters.AddRange(insert_params);
 
-                    _DA.InsertCommand = ins_cmd;
-                    _DA.Update(table);
-                }
+                if (_last_error == 0)//--Если табличка успешно создана, то надо ее заполнить                 
+                    InsertDataToDb(table, _parameters_prefix);
             }
             else
             {
@@ -431,6 +414,33 @@ namespace anvlib.Data.Database
             }
         }
 
+        /*public void insert(DataTable table)
+        {
+            string insert_sql = string.Format("insert into {0} values(", table.TableName);            
+            Array insert_params = new DbParameter[table.Columns.Count];
+            for (int i = 0; i < table.Columns.Count; i++)
+            {
+                insert_sql = string.Format("{0}@{1}", insert_sql, table.Columns[i].ColumnName + (i + 1 != table.Columns.Count ? "," : ");"));
+                DbParameter par = CreateParameter(string.Format("@{0}", table.Columns[i].ColumnName), Utilites.SystemTypeToDbTypeConverter.Convert(table.Columns[i].DataType), table.Columns[i].MaxLength);
+                par.SourceColumn = table.Columns[i].ColumnName;
+                insert_params.SetValue(par, i);
+            }
+
+            _DA = new SqlDataAdapter();
+            var ins_cmd = CreateCommand(insert_sql);
+            ins_cmd.Parameters.AddRange(insert_params);
+
+            _DA.InsertCommand = ins_cmd;
+            _DA.Update(table);
+        }*/        
+
+        /// <summary>
+        /// Метод, проверяющий наличие объекта в базе данных по имени
+        /// </summary>
+        /// <param name="obj_name"></param>
+        /// <param name="obj_type"></param>
+        /// <param name="CaseSensivity"></param>
+        /// <returns></returns>
         public override bool IsDBObjectExists(string obj_name, DataBaseObjects obj_type, bool CaseSensivity)
         {            
             if (Connected)

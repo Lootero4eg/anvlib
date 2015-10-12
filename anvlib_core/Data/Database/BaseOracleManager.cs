@@ -9,6 +9,7 @@ using System.Data.Common;
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
 
+using anvlib.Classes.Attributes;
 using anvlib.Enums;
 using anvlib.Interfaces;
 
@@ -162,7 +163,7 @@ namespace anvlib.Data.Database
             }
             #endregion
 
-            _param = new OracleParameter(ParName, tmpType, ParSize);
+            _param = new OracleParameter(ParName, tmpType, (ParSize > -1 ? ParSize : 0));
             DbParameter tmpPar = _param;
 
             return tmpPar;
@@ -211,14 +212,97 @@ namespace anvlib.Data.Database
             return null;
         }
 
+        [Incomplete]
         public override void CreateTable(DataTable table) 
         {
-            throw new NotImplementedException();
-        }
+            if (Connected)
+            {
+                base.CreateTable(table);
 
+                string sqlsc;
+                sqlsc = "CREATE TABLE " + table.TableName + "(";
+                for (int i = 0; i < table.Columns.Count; i++)
+                {
+                    sqlsc += "" + table.Columns[i].ColumnName;
+                    if (table.Columns[i].DataType.ToString().Contains("System.Int32"))
+                        sqlsc += " number";
+                    else if (table.Columns[i].DataType.ToString().Contains("System.DateTime"))
+                        sqlsc += " datetime";
+                    else if (table.Columns[i].DataType.ToString().Contains("System.String"))
+                        sqlsc += " varchar2(" + (table.Columns[i].MaxLength > -1 ? table.Columns[i].MaxLength.ToString() : "50") + ")";
+                    /*else if (table.Columns[i].DataType.ToString().Contains("System.Single"))
+                        sqlsc += " single ";*/
+                    else if (table.Columns[i].DataType.ToString().Contains("System.Double"))
+                        sqlsc += " float";
+                    else if (table.Columns[i].DataType.ToString().Contains("System.Guid"))
+                        sqlsc += " raw(32)";
+                    else if (table.Columns[i].DataType.ToString().Contains("System.Boolean"))
+                        sqlsc += " number(1)";
+                    else if (table.Columns[i].DataType.ToString().Contains("System.Byte"))
+                        sqlsc += " number(1)";
+                    else if (table.Columns[i].DataType.ToString().Contains("System.Int16"))
+                        sqlsc += " number";
+                    else
+                        sqlsc += " varchar2(" + (table.Columns[i].MaxLength > -1 ? table.Columns[i].MaxLength.ToString() : "50") + ")";
+
+
+                    //--Придумать как сделать создание сиквенцов и привязку триггера
+                    /*if (table.Columns[i].AutoIncrement)
+                        sqlsc += " IDENTITY(" + table.Columns[i].AutoIncrementSeed.ToString() + "," + table.Columns[i].AutoIncrementStep.ToString() + ") ";*/
+                    if (!table.Columns[i].AllowDBNull)
+                        sqlsc += " NOT NULL";
+                    sqlsc += ",";
+                }
+
+                if (table.PrimaryKey.Length > 0)
+                {
+                    string pks = "CONSTRAINT PK_" + table.TableName + " PRIMARY KEY (";
+                    for (int i = 0; i < table.PrimaryKey.Length; i++)
+                    {
+                        pks += table.PrimaryKey[i].ColumnName + ",";
+                    }
+                    pks = pks.Substring(0, pks.Length - 1) + ")";
+                    sqlsc += pks;
+                    sqlsc = sqlsc + ")";
+                }
+                else
+                    sqlsc = sqlsc.Substring(0, sqlsc.Length - 1) + ");";
+
+                ExecuteCommand(CreateCommand(sqlsc).ExecuteNonQuery);
+
+                if (_last_error == 0)//--Если табличка успешно создана, то надо ее заполнить                 
+                    InsertDataToDb(table, _parameters_prefix);
+            }
+            else
+            {
+                if (MessagePrinter != null)
+                    MessagePrinter.PrintMessage("Не установлено соединение с базой данных!", "Ошибка", 1, 1);
+            }
+        }
+                
         public override bool IsDBObjectExists(string obj_name, DataBaseObjects obj_type, bool CaseSensivity)
         {
-            throw new NotImplementedException();
+            if (Connected)
+            {
+                string sql = "";
+                if (CaseSensivity)
+                    sql = "select 1 from all_objects where object_name='{0}' and object_type='{1}'";
+                else
+                    sql = "select 1 from all_objects where lower(object_name)=lower('{0}') and object_type='{1}'";
+
+                sql = string.Format(sql, obj_name, GetObjectTypeCode(obj_type));
+
+                var exec_res = ExecuteScalarCommand(CreateCommand(sql).ExecuteScalar);
+                if (exec_res != null && exec_res != DBNull.Value)
+                    return true;
+            }
+            else
+            {
+                if (MessagePrinter != null)
+                    MessagePrinter.PrintMessage("Не установлено соединение с базой данных!", "Ошибка", 1, 1);
+            }
+
+            return false;
         }
 
         protected override void CreateLogin(string UserName, string Paswword, string AdditionalOptions)
@@ -229,6 +313,49 @@ namespace anvlib.Data.Database
         protected override void DeleteLogin(string UserName, string AdditionalOptions)
         {
             throw new NotImplementedException();
+        }
+
+        [Incomplete]
+        protected string GetObjectTypeCode(DataBaseObjects db_object)
+        {
+            string res = "TABLE";
+
+            switch (db_object)
+            {
+                case DataBaseObjects.foreign_key:
+                    res = "";
+                    break;
+
+                case DataBaseObjects.function:
+                    res = "";
+                    break;
+
+                case DataBaseObjects.index:
+                    res = "";
+                    break;
+
+                case DataBaseObjects.primary_key:
+                    res = "";
+                    break;
+
+                case DataBaseObjects.procedure:
+                    res = "";
+                    break;
+
+                case DataBaseObjects.table:
+                    res = "TABLE";
+                    break;
+
+                case DataBaseObjects.trigger:
+                    res = "TRIGGER";
+                    break;
+
+                case DataBaseObjects.type:
+                    res = "";
+                    break;
+            }
+
+            return res;
         }
     }
 }

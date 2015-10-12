@@ -35,6 +35,7 @@ namespace anvlib.Data.Database
         protected string _TransactionStartCmd;//--команда начала транзакции
         protected string _TransactionEndCmd;//--комнад окончания транзакции
         protected string _connectionString;//--строка соединения
+        protected string _owner;//--владелец объекта
         protected char _open_bracket;//--для избежания проблем с системными полями
         protected char _close_bracket;//--для избежания проблем с системными полями
 
@@ -115,6 +116,7 @@ namespace anvlib.Data.Database
         /// <summary>
         /// Установить соединение с сервером, если заранее заполнили свойство Connection
         /// </summary>
+        [Obsolete]
         public void Connect()
         {
             Reconnect();
@@ -191,7 +193,24 @@ namespace anvlib.Data.Database
         /// </summary>
         /// <param name="table">Таблица в формате DataTable</param>
         [Experimental]
-        public abstract void CreateTable(DataTable table);
+        public virtual void CreateTable(DataTable table)
+        {
+            if (string.IsNullOrEmpty(table.TableName))
+            {
+                if (MessagePrinter != null)
+                    MessagePrinter.PrintMessage("В переменной DataTable, незаполнено поле TableName!", "Ошибка", 1, 1);
+
+                return;
+            }
+
+            if (table.Columns.Count <= 0)
+            {
+                if (MessagePrinter != null)
+                    MessagePrinter.PrintMessage("В переменной DataTable, нет ни одного столбца!", "Ошибка", 1, 1);
+
+                return;
+            }
+        }
         
         /// <summary>
         /// Метод стирания таблицы из базы данных или схемы
@@ -200,7 +219,7 @@ namespace anvlib.Data.Database
         [Experimental]
         public virtual void DropTable(string TableName)
         {
-            string sql = string.Format("DROP TABLE {0};", TableName);
+            string sql = string.Format("DROP TABLE {0}", TableName);
             ExecuteCommand(CreateCommand(sql).ExecuteNonQuery);
         }
 
@@ -286,6 +305,26 @@ namespace anvlib.Data.Database
         protected abstract void CreateLogin(string LoginName, string Paswword, string AdditionalOptions);
 
         protected abstract void DeleteLogin(string LoginName, string AdditionalOptions);
+
+        protected virtual void InsertDataToDb(DataTable table,string parameters_prefix)
+        {
+            string insert_sql = string.Format("insert into {0} values(", table.TableName);
+            Array insert_params = new DbParameter[table.Columns.Count];
+            for (int i = 0; i < table.Columns.Count; i++)
+            {
+                insert_sql = string.Format("{0}{2}{1}", insert_sql, table.Columns[i].ColumnName + (i + 1 != table.Columns.Count ? "," : ")"), parameters_prefix);
+                DbParameter par = CreateParameter(string.Format("{1}{0}", table.Columns[i].ColumnName, parameters_prefix), Utilites.SystemTypeToDbTypeConverter.Convert(table.Columns[i].DataType), table.Columns[i].MaxLength);
+                par.SourceColumn = table.Columns[i].ColumnName;
+                insert_params.SetValue(par, i);
+            }
+
+            _DA = CreateDataAdapter("");
+            var ins_cmd = CreateCommand(insert_sql);
+            ins_cmd.Parameters.AddRange(insert_params);
+
+            _DA.InsertCommand = ins_cmd;
+            _DA.Update(table);
+        }
 
         #endregion
     }

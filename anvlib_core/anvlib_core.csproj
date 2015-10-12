@@ -43,6 +43,10 @@
       <HintPath>..\anvlib\References DLLs\Mono.Security.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="mysql.data, Version=6.9.7.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\LIBRARIES\mysql-1.2.4\v4\mysql.data.dll</HintPath>
+    </Reference>
     <Reference Include="Npgsql">
       <HintPath>..\anvlib\References DLLs\Npgsql.dll</HintPath>
       <Private>False</Private>
@@ -73,6 +77,7 @@
     <Compile Include="Data\Database\BaseDbManager.cs" />
     <Compile Include="Data\Database\BaseMSSQLManager.cs" />
     <Compile Include="Classes\Base\BaseOptions.cs" />
+    <Compile Include="Data\Database\BaseMySQLManager.cs" />
     <Compile Include="Data\Database\BaseOracleManager.cs" />
     <Compile Include="Classes\Base\BasePlugin.cs" />
     <Compile Include="Data\Database\BasePostgresSQLManager.cs" />
@@ -139,6 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="References DLLs\Mono.Security.dll" />
+    <Content Include="References DLLs\mysql.data.dll" />
     <Content Include="References DLLs\Npgsql.dll" />
     <Content Include="References DLLs\oci.dll" />
     <Content Include="References DLLs\Oracle.DataAccess.dll" />
@@ -146,6 +152,7 @@
     <Content Include="References DLLs\oraociei11.dll" />
     <Content Include="References DLLs\OraOps11w.dll" />
     <Content Include="References DLLs\policy.2.0.Npgsql.dll" />
+    <Content Include="References DLLs\System.Data.SQLite.dll" />
   </ItemGroup>
   <ItemGroup>
     <None Include="anvlib_core.pfx" />
