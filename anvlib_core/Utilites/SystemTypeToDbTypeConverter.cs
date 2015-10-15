@@ -38,7 +38,7 @@ namespace anvlib.Utilites
                 res = DbType.Decimal;
 
             if(type == typeof(double))
-                res = DbType.Double;
+                res = DbType.Double;            
 
             if(type == typeof(Guid))
                 res = DbType.Guid;                

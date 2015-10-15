@@ -16,15 +16,15 @@ namespace anvlib.Data.Database
     /// <summary>
     /// Базовый класс для баз данных SQL Lite
     /// </summary>
-    public class BaseSQLiteManager: BaseDbManager
+    public class BaseSQLiteManager : BaseDbManager
     {
         /// <summary>
         /// Конструктор с дефолтными значениями
         /// </summary>
         public BaseSQLiteManager()
             : base()
-        {             
-            _open_bracket='"';
+        {
+            _open_bracket = '"';
             _close_bracket = '"';
             _parameters_prefix = "@";
         }
@@ -39,12 +39,12 @@ namespace anvlib.Data.Database
             _conn = new SQLiteConnection(ConnectionString);
             try
             {
-                _conn.Open();                
+                _conn.Open();
             }
             catch (SQLiteException ex)
-            {                
+            {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(ex.Message, "Ошибка базы данных", 1, 1);
+                    MessagePrinter.PrintMessage(ex.Message, MsgMgr.MessageText.DBErrorMsg, 1, 1);
             }
         }
 
@@ -52,7 +52,7 @@ namespace anvlib.Data.Database
         /// Метод, создает или открывает уже существующий файл базы данных
         /// </summary>
         /// <param name="Filename">Имя файла БД</param>
-        public void OpenDbFile(string Filename) 
+        public void OpenDbFile(string Filename)
         {
             Connect(string.Format("URI=file:{0}", Filename));
         }
@@ -121,7 +121,7 @@ namespace anvlib.Data.Database
             DbDataAdapter tmpDA = _DA;
 
             return tmpDA;
-        }        
+        }
 
         protected override DbParameter CreateParameter(string ParName, DbType ParType, int ParSize)
         {
@@ -137,26 +137,13 @@ namespace anvlib.Data.Database
         /// Метод создания таблицы из DataTable
         /// </summary>
         /// <param name="table">Таблица</param>
+        /// <param name="insert_method">В этой СУБД этот параметр не работает, поэтому можно внести любое значение</param>
         [Experimental]
-        public override void CreateTable(DataTable table)
+        public override void CreateTable(DataTable table, DataInsertMethod insert_method)
         {
             if (Connected)
             {
-                if (string.IsNullOrEmpty(table.TableName))
-                {
-                    if (MessagePrinter != null)
-                        MessagePrinter.PrintMessage("В переменной DataTable, незаполнено поле TableName!", "Ошибка", 1, 1);
-
-                    return;
-                }
-
-                if (table.Columns.Count <= 0)
-                {
-                    if (MessagePrinter != null)
-                        MessagePrinter.PrintMessage("В переменной DataTable, нет ни одного столбца!", "Ошибка", 1, 1);
-
-                    return;
-                }
+                base.CreateTable(table, insert_method);
 
                 string sqlsc;
                 sqlsc = "CREATE TABLE " + table.TableName + "(";
@@ -173,6 +160,8 @@ namespace anvlib.Data.Database
                         sqlsc += " integer";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Double"))
                         sqlsc += " real";
+                    /*else if (table.Columns[i].DataType.ToString().Contains("System.Double"))
+                        sqlsc += " integer";*/
                     else if (table.Columns[i].DataType.ToString().Contains("System.Guid"))
                         sqlsc += " text";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Boolean"))
@@ -186,12 +175,12 @@ namespace anvlib.Data.Database
                     else
                         sqlsc += " text";
 
-
-
                     if (table.Columns[i].AutoIncrement)
                         sqlsc += " AUTOINCREMENT(" + table.Columns[i].AutoIncrementSeed.ToString() + "," + table.Columns[i].AutoIncrementStep.ToString() + ")";
                     if (!table.Columns[i].AllowDBNull)
-                        sqlsc += " NOT NULL ";
+                        sqlsc += " NOT NULL";
+                    if (table.Columns[i].DefaultValue != null && table.Columns[i].DefaultValue != DBNull.Value)
+                        sqlsc += " DEFAULT " + table.Columns[i].DefaultValue.ToString();
                     sqlsc += ",";
                 }
 
@@ -213,13 +202,15 @@ namespace anvlib.Data.Database
 
                 if (_last_error == 0)//--Если табличка успешно создана, то надо ее заполнить 
                 {
+                    BeginTransaction();
                     InsertDataToDb(table, _parameters_prefix);
+                    CommitTransaction();
                 }
             }
             else
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage("Не установлено соединение с базой данных!", "Ошибка", 1, 1);
+                    MessagePrinter.PrintMessage(MsgMgr.MessageText.NotConnectedMsg, MsgMgr.MessageText.ErrorMsg, 1, 1);
             }
         }
 
@@ -260,7 +251,7 @@ namespace anvlib.Data.Database
             else
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage("Не установлено соединение с базой данных!", "Ошибка", 1, 1);
+                    MessagePrinter.PrintMessage(MsgMgr.MessageText.NotConnectedMsg, MsgMgr.MessageText.ErrorMsg, 1, 1);
             }
 
             return false;
@@ -311,13 +302,13 @@ namespace anvlib.Data.Database
 
         protected override void CreateLogin(string LoginName, string Paswword, string AdditionalOptions)
         {
-            throw new Exception("В этой СУБД отсутствует понятия пользователей!");
+            throw new Exception(MsgMgr.MessageText.UsersManagmentIsNotSupported);
         }
 
         protected override void DeleteLogin(string LoginName, string AdditionalOptions)
         {
-            throw new Exception("В этой СУБД отсутствует понятия пользователей!");
-        }        
+            throw new Exception(MsgMgr.MessageText.UsersManagmentIsNotSupported);
+        }
 
         /// <summary>
         /// Обертка для выполнения DbCommand
@@ -331,9 +322,9 @@ namespace anvlib.Data.Database
                 proc.Invoke();
             }
             catch (SQLiteException e)
-            {                
+            {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(e.Message, "Ошибка базы данных", 1, 1);
+                    MessagePrinter.PrintMessage(e.Message, MsgMgr.MessageText.DBErrorMsg, 1, 1);
             }
         }
 
@@ -349,9 +340,9 @@ namespace anvlib.Data.Database
                 return proc.Invoke();
             }
             catch (SQLiteException e)
-            {                
+            {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(e.Message, "Ошибка базы данных", 1, 1);
+                    MessagePrinter.PrintMessage(e.Message, MsgMgr.MessageText.DBErrorMsg, 1, 1);
             }
 
             return null;
@@ -369,12 +360,91 @@ namespace anvlib.Data.Database
                 return proc.Invoke();
             }
             catch (SQLiteException e)
-            {                
+            {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(e.Message, "Ошибка базы данных", 1, 1);
+                    MessagePrinter.PrintMessage(e.Message, MsgMgr.MessageText.DBErrorMsg, 1, 1);
             }
 
             return null;
-        }        
-    } 
+        }
+
+        protected override DataTable GetTablePrimaryKey(DataTable table, bool CaseSensivity)
+        {
+            _DR = ExecuteDataReader(CreateCommand(string.Format("pragma table_info({0})", table.TableName)).ExecuteReader);
+            List<DataColumn> cols = new List<DataColumn>();
+            while (_DR.Read())
+            {
+                foreach (DataColumn col in table.Columns)
+                {
+                    if (CaseSensivity)
+                    {
+                        if (_DR["name"].ToString() == col.ColumnName)
+                        {
+                            if (Convert.ToBoolean(_DR["pk"]))
+                                cols.Add(col);
+                        }
+                    }
+                    else
+                    {
+                        if (_DR["name"].ToString().ToLower() == col.ColumnName.ToLower())
+                        {
+                            if (Convert.ToBoolean(_DR["pk"]))
+                                cols.Add(col);
+                        }
+                    }
+                }
+            }
+
+            _DR.Close();
+
+            if (cols.Count > 0)
+                table.PrimaryKey = cols.ToArray();
+
+            return table;
+        }
+
+        internal override DbColumnInformation GetDbColumnInformation(string tablename, string columnname, bool CaseSensivity)
+        {
+            DbColumnInformation res = new DbColumnInformation();
+
+            string sql = "";
+            if (!CaseSensivity)
+                sql = string.Format("select max(length({0})) from {1}", columnname, tablename);
+            else
+                sql = string.Format("select max(length({0}{1}{2})) from {0}{3}{2}", _open_bracket, columnname, _close_bracket, tablename);
+            var res2 = ExecuteScalarCommand(CreateCommand(sql).ExecuteScalar);
+            if (res2 != null && res2 != DBNull.Value)
+            {
+                var mlen = Convert.ToInt32(res2);
+                res.MaxLength = (mlen > 0 ? mlen : 50);
+            }
+            
+            _DR = ExecuteDataReader(CreateCommand(string.Format("pragma table_info({0})",tablename)).ExecuteReader);
+            while (_DR.Read())
+            {
+                if (CaseSensivity)
+                {
+                    if (_DR["name"].ToString() == columnname)
+                    {
+                        res.IsNullable = !Convert.ToBoolean(_DR["notnull"]);
+                        if (_DR["dflt_value"] != DBNull.Value)
+                            res.DefaultValue = _DR["dflt_value"];
+                    }
+                }
+                else
+                {
+                    if (_DR["name"].ToString().ToLower() == columnname.ToLower())
+                    {
+                        res.IsNullable = !Convert.ToBoolean(_DR["notnull"]);
+                        if (_DR["dflt_value"] != DBNull.Value)
+                            res.DefaultValue = _DR["dflt_value"];
+                    }
+                }
+            }
+
+            _DR.Close();
+
+            return res;
+        }
+    }
 }

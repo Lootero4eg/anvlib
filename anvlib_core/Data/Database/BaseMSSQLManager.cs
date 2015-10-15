@@ -16,15 +16,15 @@ namespace anvlib.Data.Database
     /// <summary>
     /// Базовый класс для MSSQL серверов
     /// </summary>    
-    public class BaseMSSQLManager: BaseDbManager
+    public class BaseMSSQLManager : BaseDbManager
     {
         /// <summary>
         /// Конструктор с дефолтными значениями
         /// </summary>
         public BaseMSSQLManager()
             : base()
-        { 
-            _open_bracket='[';
+        {
+            _open_bracket = '[';
             _close_bracket = ']';
             _parameters_prefix = "@";
         }
@@ -55,11 +55,11 @@ namespace anvlib.Data.Database
                 _conn.Open();
             }
             catch (SqlException ex)
-            {                
+            {
                 string msg = GetErrorMessage(ex);
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(msg, "Ошибка базы данных", 1, 1);                
-            }            
+                    MessagePrinter.PrintMessage(msg, MsgMgr.MessageText.DBErrorMsg, 1, 1);
+            }
         }
 
         /// <summary>
@@ -286,7 +286,7 @@ namespace anvlib.Data.Database
             {
                 string msg = GetErrorMessage(e);
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(msg, "Ошибка базы данных", 1, 1);                
+                    MessagePrinter.PrintMessage(msg, MsgMgr.MessageText.DBErrorMsg, 1, 1);
             }
         }
 
@@ -302,10 +302,10 @@ namespace anvlib.Data.Database
                 return proc.Invoke();
             }
             catch (SqlException e)
-            {                
+            {
                 string msg = GetErrorMessage(e);
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(msg, "Ошибка базы данных", 1, 1);
+                    MessagePrinter.PrintMessage(msg, MsgMgr.MessageText.DBErrorMsg, 1, 1);
             }
 
             return null;
@@ -326,49 +326,47 @@ namespace anvlib.Data.Database
             {
                 string msg = GetErrorMessage(e);
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(msg, "Ошибка базы данных", 1, 1);
+                    MessagePrinter.PrintMessage(msg, MsgMgr.MessageText.DBErrorMsg, 1, 1);
             }
 
             return null;
         }
 
+        /// <summary>
+        /// Метод, создания таблицы в БД
+        /// </summary>
+        /// <param name="table">Переменная типа DataTable</param>
         [Incomplete]
-        #warning В этом методе надо срочно сделать вычисления максимального объема для String переменных, при создании таблицы...
-        public override void CreateTable(DataTable table)
-        {            
+        public override void CreateTable(DataTable table, DataInsertMethod insert_method)
+        {
             if (Connected)
             {
-                if (string.IsNullOrEmpty(table.TableName))
-                {
-                    if (MessagePrinter != null)
-                        MessagePrinter.PrintMessage("В переменной DataTable, незаполнено поле TableName!", "Ошибка", 1, 1);
-
-                    return;
-                }
-
-                if (table.Columns.Count <= 0)
-                {
-                    if (MessagePrinter != null)
-                        MessagePrinter.PrintMessage("В переменной DataTable, нет ни одного столбца!", "Ошибка", 1, 1);
-
-                    return;
-                }
+                base.CreateTable(table, insert_method);
 
                 string sqlsc;
-                sqlsc = "CREATE TABLE " + table.TableName + "(";                
+                sqlsc = "CREATE TABLE " + table.TableName + "(";
                 for (int i = 0; i < table.Columns.Count; i++)
                 {
                     sqlsc += "\n" + table.Columns[i].ColumnName;
                     if (table.Columns[i].DataType.ToString().Contains("System.Int32"))
                         sqlsc += " int";
+                    else if (table.Columns[i].DataType.ToString().Contains("System.Int64"))//--если будут ошибки, то заменить на bigint
+                        sqlsc += " int";
                     else if (table.Columns[i].DataType.ToString().Contains("System.DateTime"))
                         sqlsc += " datetime";
+                    else if (table.Columns[i].DataType.ToString().Contains("System.Decimal"))
+                        sqlsc += " float";
                     else if (table.Columns[i].DataType.ToString().Contains("System.String"))
-                        sqlsc += " varchar(" + (table.Columns[i].MaxLength > -1 ? table.Columns[i].MaxLength.ToString() : "50") + ")";
+                    {
+                        if (table.Columns[i].MaxLength < 8000)
+                            sqlsc += " varchar(" + (table.Columns[i].MaxLength > -1 ? table.Columns[i].MaxLength.ToString() : "50") + ")";
+                        else
+                            sqlsc += " text";
+                    }
                     else if (table.Columns[i].DataType.ToString().Contains("System.Single"))
                         sqlsc += " single";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Double"))
-                        sqlsc += " double";
+                        sqlsc += " float";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Guid"))
                         sqlsc += " uniqueidentifier";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Boolean"))
@@ -385,6 +383,8 @@ namespace anvlib.Data.Database
                         sqlsc += " IDENTITY(" + table.Columns[i].AutoIncrementSeed.ToString() + "," + table.Columns[i].AutoIncrementStep.ToString() + ")";
                     if (!table.Columns[i].AllowDBNull)
                         sqlsc += " NOT NULL ";
+                    if (table.Columns[i].DefaultValue != null && table.Columns[i].DefaultValue != DBNull.Value)
+                        sqlsc += " DEFAULT " + table.Columns[i].DefaultValue.ToString();
                     sqlsc += ",";
                 }
 
@@ -404,45 +404,30 @@ namespace anvlib.Data.Database
 
                 ExecuteCommand(CreateCommand(sqlsc).ExecuteNonQuery);
 
-                if (_last_error == 0)//--Если табличка успешно создана, то надо ее заполнить                 
-                    InsertDataToDb(table, _parameters_prefix);
+                if (_last_error == 0)//--Если табличка успешно создана, то надо ее заполнить       
+                {
+                    if (insert_method == DataInsertMethod.Normal)
+                        InsertDataToDb(table, _parameters_prefix);
+                    if (insert_method == DataInsertMethod.FastIfPossible)
+                        InsertDataToDbBulkMethod(table);
+                }
             }
             else
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage("Не установлено соединение с базой данных!", "Ошибка", 1, 1);
+                    MessagePrinter.PrintMessage(MsgMgr.MessageText.NotConnectedMsg, MsgMgr.MessageText.ErrorMsg, 1, 1);
             }
-        }
-
-        /*public void insert(DataTable table)
-        {
-            string insert_sql = string.Format("insert into {0} values(", table.TableName);            
-            Array insert_params = new DbParameter[table.Columns.Count];
-            for (int i = 0; i < table.Columns.Count; i++)
-            {
-                insert_sql = string.Format("{0}@{1}", insert_sql, table.Columns[i].ColumnName + (i + 1 != table.Columns.Count ? "," : ");"));
-                DbParameter par = CreateParameter(string.Format("@{0}", table.Columns[i].ColumnName), Utilites.SystemTypeToDbTypeConverter.Convert(table.Columns[i].DataType), table.Columns[i].MaxLength);
-                par.SourceColumn = table.Columns[i].ColumnName;
-                insert_params.SetValue(par, i);
-            }
-
-            _DA = new SqlDataAdapter();
-            var ins_cmd = CreateCommand(insert_sql);
-            ins_cmd.Parameters.AddRange(insert_params);
-
-            _DA.InsertCommand = ins_cmd;
-            _DA.Update(table);
-        }*/        
+        }        
 
         /// <summary>
         /// Метод, проверяющий наличие объекта в базе данных по имени
         /// </summary>
-        /// <param name="obj_name"></param>
-        /// <param name="obj_type"></param>
-        /// <param name="CaseSensivity"></param>
+        /// <param name="obj_name">Искомый объект</param>
+        /// <param name="obj_type">Тип объекта(таблица, триггер и т.д.)</param>
+        /// <param name="CaseSensivity">Чувствительность регистра</param>
         /// <returns></returns>
         public override bool IsDBObjectExists(string obj_name, DataBaseObjects obj_type, bool CaseSensivity)
-        {            
+        {
             if (Connected)
             {
                 //--Тут надо переделывать, т.к. в объектах нет колонок, да и ф-ции тоже разных типов! так что пока только таблички можно искать
@@ -467,7 +452,7 @@ namespace anvlib.Data.Database
             else
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage("Не установлено соединение с базой данных!", "Ошибка", 1, 1);
+                    MessagePrinter.PrintMessage(MsgMgr.MessageText.NotConnectedMsg, MsgMgr.MessageText.ErrorMsg, 1, 1);
             }
 
             return false;
@@ -477,16 +462,16 @@ namespace anvlib.Data.Database
         {
             string msg = exp.Message;
             if (exp.Number == 201)
-                msg = "Отсутствует параметр хранимой процедуры!\r\n\r\nОригинальный текст: " + exp.Message;
+                msg = string.Format("{0}{1}", MsgMgr.MessageText.SQLSERVER_201, exp.Message);
 
             if (exp.Number == 229)
-                msg = "Отсутствуют права доступа к хранимой процедуре!\r\n\r\nОригинальный текст: " + exp.Message;
+                msg = string.Format("{0}{1}", MsgMgr.MessageText.SQLSERVER_229, exp.Message);
 
             if (exp.Number == 547)
-                msg = "Имеются ссылки из других  таблиц на удаляемую запись!\r\n\r\nОригинальный текст: " + exp.Message;
+                msg = string.Format("{0}{1}", MsgMgr.MessageText.SQLSERVER_547, exp.Message);
 
             if (exp.Number == 18456)
-                msg = "Неверные имя пользователя или пароль!\r\n\r\nОригинальный текст: " + exp.Message;
+                msg = string.Format("{0}{1}", MsgMgr.MessageText.SQLSERVER_18456, exp.Message);
 
             _last_error = exp.Number;
             RaiseExecuteException(_last_error);
@@ -606,6 +591,163 @@ namespace anvlib.Data.Database
             }
 
             return res;
+        }
+
+        protected override DataTable GetTablePrimaryKey(DataTable table, bool CaseSensivity)
+        {
+            string sql = "";
+            if (!CaseSensivity)
+            {
+                sql = string.Format("SELECT "
+                            + "   schema_name(ta.schema_id)  SchemaName "
+                            + "  ,ta.name  TableName "
+                            + "  ,ind.name "
+                            + "  ,indcol.key_ordinal Ord "
+                            + "  ,col.name  ColumnName "
+                            + "  ,ind.type_desc "
+                            + "  ,ind.fill_factor "
+                            + " from sys.tables ta "
+                            + "  inner join sys.indexes ind "
+                            + "   on ind.object_id = ta.object_id "
+                            + "  inner join sys.index_columns indcol "
+                            + "   on indcol.object_id = ta.object_id "
+                            + "    and indcol.index_id = ind.index_id "
+                            + "  inner join sys.columns col "
+                            + "   on col.object_id = ta.object_id "
+                            + "    and col.column_id = indcol.column_id "
+                            + " where ind.is_primary_key = 1 and lower(ta.name)=lower('{0}')"
+                            + " order by "
+                            + "   ta.name "
+                            + "  ,indcol.key_ordinal "
+                            , table.TableName);
+            }
+            else
+            {
+                sql = string.Format("SELECT "
+                            + "   schema_name(ta.schema_id)  SchemaName "
+                            + "  ,ta.name  TableName "
+                            + "  ,ind.name "
+                            + "  ,indcol.key_ordinal Ord "
+                            + "  ,col.name  ColumnName "
+                            + "  ,ind.type_desc "
+                            + "  ,ind.fill_factor "
+                            + " from sys.tables ta "
+                            + "  inner join sys.indexes ind "
+                            + "   on ind.object_id = ta.object_id "
+                            + "  inner join sys.index_columns indcol "
+                            + "   on indcol.object_id = ta.object_id "
+                            + "    and indcol.index_id = ind.index_id "
+                            + "  inner join sys.columns col "
+                            + "   on col.object_id = ta.object_id "
+                            + "    and col.column_id = indcol.column_id "
+                            + " where ind.is_primary_key = 1 and ta.name='{0}'"
+                            + " order by "
+                            + "   ta.name "
+                            + "  ,indcol.key_ordinal "
+                            , table.TableName);
+            }
+
+            _DR = ExecuteDataReader(CreateCommand(sql).ExecuteReader);
+
+            List<DataColumn> cols = new List<DataColumn>();
+            while (_DR.Read())
+            {
+                var col_name = _DR["ColumnName"].ToString();
+                cols.Add(table.Columns[col_name]);
+            }
+            _DR.Close();
+
+            if (cols.Count > 0)
+                table.PrimaryKey = cols.ToArray();
+
+            return table;
+        }
+
+        internal override DbColumnInformation GetDbColumnInformation(string tablename, string columnname, bool CaseSensivity)
+        {
+            DbColumnInformation res = new DbColumnInformation();
+            
+            string sql = "";
+            if (CaseSensivity)
+            {
+                sql = string.Format("select is_nullable,max_length,precision,scale, dc.definition,c.system_type_id "
+			        + "from sys.tables t inner join sys.columns c on c.object_id=t.object_id  "
+			        + "left outer join sys.default_constraints dc on dc.parent_object_id=c.object_id and c.column_id=dc.parent_column_id "
+			        + "where t.name='{0}' and c.name='{1}'"
+			        , tablename, columnname);
+            }
+            else
+                sql = string.Format("select is_nullable,max_length,precision,scale, dc.definition,c.system_type_id "
+                    + "from sys.tables t inner join sys.columns c on c.object_id=t.object_id  "
+                    + "left outer join sys.default_constraints dc on dc.parent_object_id=c.object_id and c.column_id=dc.parent_column_id "
+                    + "where lower(t.name)=lower('{0}') and lower(c.name)=lower('{1}')"
+                    , tablename, columnname);
+
+            _DR = ExecuteDataReader(CreateCommand(sql).ExecuteReader);
+
+            while (_DR.Read())
+            {
+                res.IsNullable = (bool)_DR["is_nullable"];
+                res.MaxLength = Convert.ToInt32(_DR["max_length"]);
+                res.Precision = Convert.ToInt32(_DR["precision"]);
+                res.Sacale = Convert.ToInt32(_DR["scale"]);
+                if (_DR["definition"] != DBNull.Value)
+                {
+                    res.DefaultValue = _DR["definition"];
+                    res.DefaultValue = DefValuePostProcessing(res.DefaultValue);
+                }
+                else
+                    res.DefaultValue = null;
+
+                if (_DR["system_type_id"] != null && _DR["system_type_id"] != DBNull.Value)
+                {
+                    int coltype = Convert.ToInt32(_DR["system_type_id"]);
+                    if (coltype == 35)
+                        res.MaxLength = 0;
+                }
+
+                break;
+            }
+
+            _DR.Close();
+
+            /*var result = ExecuteScalarCommand(CreateCommand(sql).ExecuteScalar);
+            if (result != null && result != DBNull.Value)
+                res.MaxLength = Convert.ToInt32(result);*/
+
+            return res;
+        }
+
+        protected void InsertDataToDbBulkMethod(DataTable table)
+        {
+            SqlBulkCopy bcopy = new SqlBulkCopy(_conn as SqlConnection);
+            bcopy.DestinationTableName = table.TableName;
+            bcopy.WriteToServer(table);
+            bcopy.Close();
+        }
+
+        private object DefValuePostProcessing(object defval)
+        {
+            string tmpst = defval.ToString();
+
+            while (true)
+            {
+                if (tmpst.IndexOf("(") < 0)
+                    break;
+                else
+                {
+                    while (tmpst[0] == '(')
+                        tmpst = tmpst.Remove(0, 1);
+                    while (tmpst[tmpst.Length - 1] == ')')
+                        tmpst = tmpst.Remove(tmpst.Length - 1, 1);
+                    if (tmpst.IndexOf("(") < 0)
+                        return tmpst;
+                    else
+                        return DBNull.Value;
+                }
+            }
+
+            return defval;
         }
     }
 }

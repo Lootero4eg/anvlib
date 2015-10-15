@@ -12,7 +12,7 @@ namespace anvlib.Interfaces
         /// Экпорт таблицы
         /// </summary>
         /// <param name="table"></param>
-        void Export(DataTable table);
+        void Export(DataTable table, bool CaseSensivity);
 
         /// <summary>
         /// Событие успешного выполнения экспорта

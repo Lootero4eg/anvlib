@@ -49,7 +49,7 @@ namespace anvlib.Data.ExportTableMethods
         /// </summary>
         /// <param name="table"></param>
         /// <param name="additionaldata"></param>
-        public void Export(DataTable table)
+        public void Export(DataTable table, bool CaseSensivity)
         {
             try
             {

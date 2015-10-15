@@ -10,6 +10,7 @@ using anvlib.Enums;
 using anvlib.Interfaces;
 using anvlib.Classes.PrintMessageSystems;
 using anvlib.Classes.Attributes;
+using anvlib.Data.Database.Messages;
 
 namespace anvlib.Data.Database
 {
@@ -42,6 +43,7 @@ namespace anvlib.Data.Database
         protected int _last_error = 0;
 
         protected IPrintMessageSystem MessagePrinter;
+        protected DbMsgManager MsgMgr = new DbMsgManager();
 
         #region BaseDbManager Properties & Methods
 
@@ -69,8 +71,8 @@ namespace anvlib.Data.Database
         {
             get
             {
-                if(_conn != null)
-                    if( _conn.State == System.Data.ConnectionState.Open)
+                if (_conn != null)
+                    if (_conn.State == System.Data.ConnectionState.Open)
                         return true;
 
                 return false;
@@ -88,13 +90,22 @@ namespace anvlib.Data.Database
         /// </summary>
         public bool HasUncommitedTransaction
         {
-            get 
+            get
             {
                 if (_transaction != null)
                     return true;
                 else
                     return false;
             }
+        }
+
+        /// <summary>
+        /// Владелец схемы данных
+        /// </summary>
+        public string SchemaOwner
+        {
+            get { return _owner; }
+            set { _owner = value; }
         }
 
         /// <summary>
@@ -130,7 +141,7 @@ namespace anvlib.Data.Database
             if (Connected)
             {
                 if (_transaction != null)
-                    throw new Exception("Необходимо завершить начатую Транзанкцию!");
+                    throw new Exception(MsgMgr.MessageText.TransactionNotEndedMsg);
 
                 _conn.Close();
             }
@@ -153,7 +164,7 @@ namespace anvlib.Data.Database
                 catch (Exception e)
                 {
                     if (MessagePrinter != null)
-                        MessagePrinter.PrintMessage(e.Message, "Ошибка базы данных", 1, 1);
+                        MessagePrinter.PrintMessage(e.Message, MsgMgr.MessageText.DBErrorMsg, 1, 1);
                 }
             }
         }
@@ -164,7 +175,7 @@ namespace anvlib.Data.Database
         /// <param name="SQLText">Текст запроса</param>
         /// <returns></returns>
         protected abstract DbDataAdapter CreateDataAdapter(string SQLText);
-        
+
         /// <summary>
         /// Метод создание DbDataAdapter-а
         /// </summary>
@@ -193,12 +204,12 @@ namespace anvlib.Data.Database
         /// </summary>
         /// <param name="table">Таблица в формате DataTable</param>
         [Experimental]
-        public virtual void CreateTable(DataTable table)
+        public virtual void CreateTable(DataTable table, DataInsertMethod insert_method)
         {
             if (string.IsNullOrEmpty(table.TableName))
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage("В переменной DataTable, незаполнено поле TableName!", "Ошибка", 1, 1);
+                    MessagePrinter.PrintMessage(MsgMgr.MessageText.DatatableNameNotFoundMsg, MsgMgr.MessageText.ErrorMsg, 1, 1);
 
                 return;
             }
@@ -206,12 +217,12 @@ namespace anvlib.Data.Database
             if (table.Columns.Count <= 0)
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage("В переменной DataTable, нет ни одного столбца!", "Ошибка", 1, 1);
+                    MessagePrinter.PrintMessage(MsgMgr.MessageText.DatatableColumnsNotFoundMsg, MsgMgr.MessageText.ErrorMsg, 1, 1);
 
                 return;
             }
         }
-        
+
         /// <summary>
         /// Метод стирания таблицы из базы данных или схемы
         /// </summary>
@@ -242,7 +253,7 @@ namespace anvlib.Data.Database
             if (Connected)
                 _transaction = _conn.BeginTransaction(IsolationLevel.ReadCommitted);
             else
-                throw new Exception("Соединение с базой данных не инициализировано!");
+                throw new Exception(MsgMgr.MessageText.NotConnectedMsg);
         }
 
         /// <summary>
@@ -256,7 +267,7 @@ namespace anvlib.Data.Database
                 _transaction = null;
             }
             else
-                throw new Exception("Для того чтобы завершить транзанкцию, вам необходимо ее начать!");
+                throw new Exception(MsgMgr.MessageText.TransactionNotStartedMsg);
         }
 
         /// <summary>
@@ -270,7 +281,7 @@ namespace anvlib.Data.Database
                 _transaction = null;
             }
             else
-                throw new Exception("Для того чтобы завершить транзанкцию, вам необходимо ее начать!");
+                throw new Exception(MsgMgr.MessageText.TransactionNotStartedMsg);
         }
 
         public void SetPrintMessageSystem(IPrintMessageSystem MsgSystem)
@@ -305,8 +316,9 @@ namespace anvlib.Data.Database
         protected abstract void CreateLogin(string LoginName, string Paswword, string AdditionalOptions);
 
         protected abstract void DeleteLogin(string LoginName, string AdditionalOptions);
-
-        protected virtual void InsertDataToDb(DataTable table,string parameters_prefix)
+        
+        //--пока этот метод вызывается из CreateTable, проверку на _conn.Open делать не надо, но как только будет отдельно, надо будет делать!
+        protected virtual void InsertDataToDb(DataTable table, string parameters_prefix)
         {
             string insert_sql = string.Format("insert into {0} values(", table.TableName);
             Array insert_params = new DbParameter[table.Columns.Count];
@@ -317,14 +329,98 @@ namespace anvlib.Data.Database
                 par.SourceColumn = table.Columns[i].ColumnName;
                 insert_params.SetValue(par, i);
             }
-
+            
             _DA = CreateDataAdapter("");
             var ins_cmd = CreateCommand(insert_sql);
-            ins_cmd.Parameters.AddRange(insert_params);
+            ins_cmd.Parameters.AddRange(insert_params);            
 
             _DA.InsertCommand = ins_cmd;
             _DA.Update(table);
+            
         }
+
+        public virtual DataTable GetTableFromDb(string tablename, bool with_primary_key, bool with_max_string_length, bool with_default_values, bool CaseSensivity)
+        {
+            _dt = new DataTable(tablename);
+            string sql = "";
+
+            if (!CaseSensivity)
+            {
+                sql = "select * from {0}";
+                if (!string.IsNullOrEmpty(_owner))
+                {
+                    sql = "select * from {0}.{1}";
+                    sql = string.Format(sql, _owner, tablename);
+                }
+                else
+                    sql = string.Format(sql, tablename);
+            }
+            else
+            {
+                sql = "select * from {0}{1}{2}";
+                if (!string.IsNullOrEmpty(_owner))
+                {
+                    sql = "select * from {0}{1}{2}.{0}{3}{2}";
+                    sql = string.Format(sql, _open_bracket, _owner, _close_bracket, tablename);
+                }
+                else
+                    sql = string.Format(sql, _open_bracket, tablename, _close_bracket);
+            }
+                            
+            _DA = CreateDataAdapter(sql);
+            _DA.FillLoadOption = LoadOption.Upsert;//--Важднейшая опция, после которой можно вставить эту таблицу в другую базу     
+            _DA.FillSchema(_dt, SchemaType.Source);
+            PrepareTableSchemeBeforeFill(_dt);
+            _DA.Fill(_dt);
+
+            //--описание колонок 
+            foreach (DataColumn col in _dt.Columns)
+            {                
+                var col_info = GetDbColumnInformation(tablename, col.ColumnName, CaseSensivity);
+                col.AllowDBNull = col_info.IsNullable;
+                if (with_max_string_length)
+                {
+                    if (col.DataType == typeof(string))
+                        if (col_info.MaxLength > 0)
+                            col.MaxLength = col_info.MaxLength;
+                }
+
+                if (with_default_values)
+                {
+                    //--надо будет придумать какой-то флаг, чтобы сообщалось что не все дефолтные значения распарсились
+                    if (col_info.DefaultValue != null && col_info.DefaultValue != DBNull.Value)
+                    {
+                        try
+                        {
+                            col.DefaultValue = col_info.DefaultValue;
+                        }
+                        catch
+                        {
+                            col.DefaultValue = DBNull.Value;
+                        }
+                    }
+                }
+            }
+
+            if (with_primary_key)
+                _dt = GetTablePrimaryKey(_dt, CaseSensivity);
+
+            return _dt;
+        }
+
+        protected abstract DataTable GetTablePrimaryKey(DataTable table, bool CaseSensivity);
+
+        internal virtual DbColumnInformation GetDbColumnInformation(string tablename, string columnname, bool CaseSensivity)
+        {
+            DbColumnInformation res = new DbColumnInformation();
+
+            res.MaxLength = 50;
+            res.IsNullable = true;
+
+            return res;
+        }
+
+        internal virtual void PrepareTableSchemeBeforeFill(DataTable table) { }
 
         #endregion
     }

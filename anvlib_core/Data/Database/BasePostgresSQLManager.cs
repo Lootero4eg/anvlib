@@ -167,7 +167,7 @@ namespace anvlib.Data.Database
             catch (DbException e)
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(e.Message, "Ошибка базы данных", 1, 1);
+                    MessagePrinter.PrintMessage(e.Message,MsgMgr.MessageText.DBErrorMsg, 1, 1);
             }
         }
 
@@ -180,7 +180,7 @@ namespace anvlib.Data.Database
             catch (Npgsql.NpgsqlException e)
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(e.Message, "Ошибка базы данных", 1, 1);
+                    MessagePrinter.PrintMessage(e.Message,MsgMgr.MessageText.DBErrorMsg, 1, 1);
             }
 
             return null;
@@ -196,13 +196,13 @@ namespace anvlib.Data.Database
             catch (Npgsql.NpgsqlException e)
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(e.Message, "Ошибка базы данных", 1, 1);
+                    MessagePrinter.PrintMessage(e.Message,MsgMgr.MessageText.DBErrorMsg, 1, 1);
             }
 
             return null; ;
         }
 
-        public override void CreateTable(DataTable table) 
+        public override void CreateTable(DataTable table, DataInsertMethod insert_method) 
         {
             throw new NotImplementedException();
         }
@@ -220,6 +220,11 @@ namespace anvlib.Data.Database
         protected override void DeleteLogin(string UserName, string AdditionalOptions)
         {
             throw new NotImplementedException();
+        }
+
+        protected override DataTable GetTablePrimaryKey(DataTable table, bool CaseSensivity)
+        {
+            return table;
         }
     }
 }

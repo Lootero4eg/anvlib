@@ -25,8 +25,8 @@ namespace anvlib.Data.Database
         /// </summary>
         public BaseOracleManager()
             : base()
-        { 
-            _open_bracket='"';
+        {
+            _open_bracket = '"';
             _close_bracket = '"';
             _parameters_prefix = ":";
         }
@@ -72,8 +72,16 @@ namespace anvlib.Data.Database
         /// <param name="ConnectionString">Строка инициализации</param>
         public override void Connect(string ConnectionString)
         {
-            _conn = new OracleConnection(ConnectionString);
-            _conn.Open();
+            try
+            {
+                _conn = new OracleConnection(ConnectionString);
+                _conn.Open();
+            }
+            catch (OracleException ex)
+            {                
+                if (MessagePrinter != null)
+                    MessagePrinter.PrintMessage(ex.Message, MsgMgr.MessageText.DBErrorMsg, 1, 1);
+            }
         }
 
         /// <summary>
@@ -98,8 +106,16 @@ namespace anvlib.Data.Database
         /// <returns></returns>
         protected override DbCommand CreateCommand(string CmdText)
         {
-            _cmd = new OracleCommand(CmdText, (OracleConnection)_conn);
-            return _cmd;
+            _cmd = new OracleCommand(CmdText, (_conn as OracleConnection));
+            DbCommand tmpCmd = _cmd;
+            if (CmdText != null && CmdText.Length > 0)
+                if (CmdText.Split(' ').Length == 1)
+                    tmpCmd.CommandType = CommandType.StoredProcedure;
+
+            if (_transaction != null)
+                tmpCmd.Transaction = _transaction;
+
+            return tmpCmd;
         }
 
         /// <summary>
@@ -109,8 +125,10 @@ namespace anvlib.Data.Database
         /// <returns></returns>
         protected override DbDataAdapter CreateDataAdapter(string SQLText)
         {
-            _DA = new OracleDataAdapter(SQLText, (OracleConnection)_conn);
-            return _DA;
+            _DA = new OracleDataAdapter(SQLText, (_conn as OracleConnection));            
+            DbDataAdapter tmpDA = _DA;            
+
+            return tmpDA;            
         }
 
         /// <summary>
@@ -120,8 +138,11 @@ namespace anvlib.Data.Database
         /// <returns></returns>
         protected override DbDataAdapter CreateDataAdapter(DbCommand cmd)
         {
-            _DA = new OracleDataAdapter((OracleCommand)_cmd);
-            return _DA;
+            _DA = new OracleDataAdapter((OracleCommand)cmd);            
+            DbDataAdapter tmpDA = _DA;
+            //tmpDA.SelectCommand.Connection = (_conn as OracleConnection); //-- по странной причине само не проставляется из конструктора
+
+            return tmpDA;
         }
 
         /// <summary>
@@ -178,7 +199,7 @@ namespace anvlib.Data.Database
             catch (DbException e)
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(e.Message, "Ошибка базы данных", 1, 1);
+                    MessagePrinter.PrintMessage(e.Message, MsgMgr.MessageText.DBErrorMsg, 1, 1);
             }
         }
 
@@ -191,7 +212,7 @@ namespace anvlib.Data.Database
             catch (OracleException e)
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(e.Message, "Ошибка базы данных", 1, 1);
+                    MessagePrinter.PrintMessage(e.Message, MsgMgr.MessageText.DBErrorMsg, 1, 1);
             }
 
             return null;
@@ -206,18 +227,18 @@ namespace anvlib.Data.Database
             catch (OracleException e)
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(e.Message, "Ошибка базы данных", 1, 1);
+                    MessagePrinter.PrintMessage(e.Message, MsgMgr.MessageText.DBErrorMsg, 1, 1);
             }
 
             return null;
         }
 
         [Incomplete]
-        public override void CreateTable(DataTable table) 
+        public override void CreateTable(DataTable table, DataInsertMethod insert_method)
         {
             if (Connected)
             {
-                base.CreateTable(table);
+                base.CreateTable(table, insert_method);
 
                 string sqlsc;
                 sqlsc = "CREATE TABLE " + table.TableName + "(";
@@ -233,7 +254,7 @@ namespace anvlib.Data.Database
                     /*else if (table.Columns[i].DataType.ToString().Contains("System.Single"))
                         sqlsc += " single ";*/
                     else if (table.Columns[i].DataType.ToString().Contains("System.Double"))
-                        sqlsc += " float";
+                        sqlsc += " float";                    
                     else if (table.Columns[i].DataType.ToString().Contains("System.Guid"))
                         sqlsc += " raw(32)";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Boolean"))
@@ -246,11 +267,13 @@ namespace anvlib.Data.Database
                         sqlsc += " varchar2(" + (table.Columns[i].MaxLength > -1 ? table.Columns[i].MaxLength.ToString() : "50") + ")";
 
 
-                    //--Придумать как сделать создание сиквенцов и привязку триггера
+                    #warning Придумать как сделать создание сиквенцов и привязку триггера
                     /*if (table.Columns[i].AutoIncrement)
                         sqlsc += " IDENTITY(" + table.Columns[i].AutoIncrementSeed.ToString() + "," + table.Columns[i].AutoIncrementStep.ToString() + ") ";*/
                     if (!table.Columns[i].AllowDBNull)
                         sqlsc += " NOT NULL";
+                    if (table.Columns[i].DefaultValue != null && table.Columns[i].DefaultValue != DBNull.Value)
+                        sqlsc += " DEFAULT " + table.Columns[i].DefaultValue.ToString();
                     sqlsc += ",";
                 }
 
@@ -270,28 +293,44 @@ namespace anvlib.Data.Database
 
                 ExecuteCommand(CreateCommand(sqlsc).ExecuteNonQuery);
 
-                if (_last_error == 0)//--Если табличка успешно создана, то надо ее заполнить                 
-                    InsertDataToDb(table, _parameters_prefix);
+                if (_last_error == 0)//--Если табличка успешно создана, то надо ее заполнить  
+                {
+                    if (insert_method == DataInsertMethod.Normal)
+                        InsertDataToDb(table, _parameters_prefix);
+                    if (insert_method == DataInsertMethod.FastIfPossible)
+                        InsertDataToDbBulkMethod(table);                    
+                }
             }
             else
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage("Не установлено соединение с базой данных!", "Ошибка", 1, 1);
+                    MessagePrinter.PrintMessage(MsgMgr.MessageText.NotConnectedMsg, MsgMgr.MessageText.ErrorMsg, 1, 1);
             }
         }
-                
+        
         public override bool IsDBObjectExists(string obj_name, DataBaseObjects obj_type, bool CaseSensivity)
         {
             if (Connected)
             {
                 string sql = "";
                 if (CaseSensivity)
+                {                 
                     sql = "select 1 from all_objects where object_name='{0}' and object_type='{1}'";
+                    if (!string.IsNullOrEmpty(_owner))
+                        sql += " and owner='{2}'";
+                }
                 else
-                    sql = "select 1 from all_objects where lower(object_name)=lower('{0}') and object_type='{1}'";
+                {
+                    sql = "select 1 from all_objects where upper(object_name)=upper('{0}') and object_type='{1}'";
+                    if (!string.IsNullOrEmpty(_owner))
+                        sql += " and upper(owner)=upper('{2}')";
+                }
 
-                sql = string.Format(sql, obj_name, GetObjectTypeCode(obj_type));
-
+                if (string.IsNullOrEmpty(_owner))
+                    sql = string.Format(sql, obj_name, GetObjectTypeCode(obj_type));
+                else
+                    sql = string.Format(sql, obj_name, GetObjectTypeCode(obj_type), _owner);
+                
                 var exec_res = ExecuteScalarCommand(CreateCommand(sql).ExecuteScalar);
                 if (exec_res != null && exec_res != DBNull.Value)
                     return true;
@@ -299,7 +338,7 @@ namespace anvlib.Data.Database
             else
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage("Не установлено соединение с базой данных!", "Ошибка", 1, 1);
+                    MessagePrinter.PrintMessage(MsgMgr.MessageText.NotConnectedMsg, MsgMgr.MessageText.ErrorMsg, 1, 1);
             }
 
             return false;
@@ -356,6 +395,164 @@ namespace anvlib.Data.Database
             }
 
             return res;
+        }
+        
+        protected override DataTable GetTablePrimaryKey(DataTable table, bool CaseSensivity)
+        {
+            string sql = null;
+            if (CaseSensivity)
+            {
+                sql = "select column_name "
+                + "from all_constraints ac inner join all_cons_columns c on c.CONSTRAINT_NAME=ac.CONSTRAINT_NAME "
+                + "where ac.constraint_type='P' and ac.table_name='{0}'";
+                if (!string.IsNullOrEmpty(_owner))
+                    sql += " and c.OWNER='{1}'";
+            }
+            else
+            {
+                sql = "select column_name "
+                + "from all_constraints ac inner join all_cons_columns c on c.CONSTRAINT_NAME=ac.CONSTRAINT_NAME "
+                + "where ac.constraint_type='P' and upper(ac.table_name)=upper('{0}')";
+                if (!string.IsNullOrEmpty(_owner))
+                    sql += " and upper(c.OWNER)=upper('{1}')";
+            }
+
+            if (string.IsNullOrEmpty(_owner))
+                sql = string.Format(sql, table.TableName);
+            else
+                sql = string.Format(sql, table.TableName, _owner);
+
+            _DR = ExecuteDataReader(CreateCommand(sql).ExecuteReader);
+
+            List<DataColumn> cols = new List<DataColumn>();
+            while (_DR.Read())
+            {
+                var col_name = _DR["column_name"].ToString();
+                cols.Add(table.Columns[col_name]);
+            }
+            _DR.Close();
+
+            if (cols.Count > 0)
+                table.PrimaryKey = cols.ToArray();            
+
+            return table;
+        }
+        
+        internal override DbColumnInformation GetDbColumnInformation(string tablename, string columnname, bool CaseSensivity)
+        {
+            DbColumnInformation res = new DbColumnInformation();
+
+            string sql = "";
+            if (CaseSensivity)
+            {
+                sql = "select TABLE_NAME,COLUMN_NAME,DATA_TYPE,DATA_LENGTH, "
+                + "data_precision,data_scale,NULLABLE,DATA_DEFAULT "
+                + " from all_tab_columns "
+                + "where  "
+                + "table_name='{0}' and column_name='{1}'";
+                if (!string.IsNullOrEmpty(_owner))
+                    sql += " and owner='{2}'";
+            }
+            else
+            {
+                sql = "select TABLE_NAME,COLUMN_NAME,DATA_TYPE,DATA_LENGTH, "
+                + "data_precision,data_scale,NULLABLE,DATA_DEFAULT "
+                + " from all_tab_columns "
+                + "where  "
+                + "upper(table_name)=upper('{0}') and upper(column_name)=upper('{1}')";
+                if (!string.IsNullOrEmpty(_owner))
+                    sql += " and upper(owner)=upper('{2}')";
+            }
+
+            if (string.IsNullOrEmpty(_owner))
+                sql = string.Format(sql, tablename, columnname);
+            else
+                sql = string.Format(sql, tablename, columnname,_owner);
+
+            _DR = ExecuteDataReader(CreateCommand(sql).ExecuteReader);
+
+            while (_DR.Read())
+            {
+                if (!string.IsNullOrEmpty(_DR["nullable"].ToString()))
+                {
+                    if (_DR["nullable"].ToString().ToUpper() == "Y")
+                        res.IsNullable = true;
+                    if (_DR["nullable"].ToString().ToUpper() == "N")
+                        res.IsNullable = false;
+                }
+                if (_DR["data_length"] != DBNull.Value)
+                    res.MaxLength = Convert.ToInt32(_DR["data_length"]);
+                if (_DR["data_precision"] != DBNull.Value)
+                    res.Precision = Convert.ToInt32(_DR["data_precision"]);
+                if (_DR["data_scale"] != DBNull.Value)
+                    res.Sacale = Convert.ToInt32(_DR["data_scale"]);
+
+                if (_DR["DATA_DEFAULT"] != DBNull.Value)
+                {
+                    res.DefaultValue = _DR["DATA_DEFAULT"];
+                    //res.DefaultValue = DefValuePostProcessing(res.DefaultValue);
+                }
+                else
+                    res.DefaultValue = null;
+
+                break;
+            }
+
+            _DR.Close();
+
+            return res;
+        }
+
+        protected void InsertDataToDbBulkMethod(DataTable table)
+        {
+            OracleBulkCopy bcopy = new OracleBulkCopy(_conn as OracleConnection);
+            bcopy.DestinationTableName = table.TableName;
+            bcopy.WriteToServer(table);
+            bcopy.Close();
+        }
+
+        internal override void PrepareTableSchemeBeforeFill(DataTable table)
+        {
+            foreach (DataColumn col in table.Columns)
+            {
+                string sql = "select DATA_TYPE, DATA_PRECISION"
+                + " from all_tab_columns "
+                + "where  "
+                + "upper(table_name)=upper('{0}') and upper(column_name)=upper('{1}')";
+                if (!string.IsNullOrEmpty(_owner))
+                    sql += " and upper(owner)=upper('{2}')";
+
+                if (string.IsNullOrEmpty(_owner))
+                    sql = string.Format(sql, col.Table.TableName, col.ColumnName);
+                else
+                    sql = string.Format(sql, col.Table.TableName, col.ColumnName, _owner);
+
+                _DR = ExecuteDataReader(CreateCommand(sql).ExecuteReader);
+                while (_DR.Read())
+                {
+                    if (_DR["DATA_TYPE"] != DBNull.Value)
+                    {
+                        if (_DR["DATA_TYPE"].ToString().ToLower() == "number")
+                        {
+                            /*var prec = _DR["DATA_PRECISION"];
+                            if (prec != DBNull.Value)
+                            {
+                                int precision = Convert.ToInt32(prec);
+                                if (precision == 1)
+                                    col.DataType = typeof(bool);
+                                else
+                                    col.DataType = typeof(int);
+                            }
+                            else*/
+                                col.DataType = typeof(int);
+                        }
+
+                        if (_DR["DATA_TYPE"].ToString().ToLower() == "float")
+                            col.DataType = typeof(double);
+                    }
+                }
+                _DR.Close();
+            }
         }
     }
 }

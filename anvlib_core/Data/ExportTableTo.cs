@@ -19,10 +19,10 @@ namespace anvlib.Data
         /// <param name="ExportMethod"></param>
         /// <param name="table"></param>
         /// <param name="additionaldata">Здесь передаются такие параметры как имя файла или база данных в которую писать</param>
-        public static void Export(IExportTableMethod ExportMethod, DataTable table)
+        public static void Export(IExportTableMethod ExportMethod, DataTable table, bool CaseSensivity)
         {
             if (ExportMethod != null)
-                ExportMethod.Export(table);
+                ExportMethod.Export(table, CaseSensivity);
         }
     }
 }
