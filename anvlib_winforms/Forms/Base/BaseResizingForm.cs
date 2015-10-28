@@ -22,31 +22,34 @@ namespace anvlib.Forms.Base
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         protected override void OnLoad(EventArgs e)
         {
-            try
+            if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Runtime)
             {
-                var classes = from z in this.GetType().Assembly.GetTypes()
-                              where (z.IsClass || z.IsInterface || z.IsEnum)
-                              && z.Namespace != null
-                              && z.Namespace.IndexOf(".Properties") > -1
-                              && z.Name == "Settings"
-                              select z;
-                var classes_items = classes.ToList();
-                if (classes_items.Count > 0)
-                    _settings = (anvlib.Interfaces.IFormsSettingsForSettings)this.GetType().Assembly.GetType(classes_items[0].FullName).GetProperty("Default").GetValue(this, null);
+                try
+                {
+                    var classes = from z in this.GetType().Assembly.GetTypes()
+                                  where (z.IsClass || z.IsInterface || z.IsEnum)
+                                  && z.Namespace != null
+                                  && z.Namespace.IndexOf(".Properties") > -1
+                                  && z.Name == "Settings"
+                                  select z;
+                    var classes_items = classes.ToList();
+                    if (classes_items.Count > 0)
+                        _settings = (anvlib.Interfaces.IFormsSettingsForSettings)this.GetType().Assembly.GetType(classes_items[0].FullName).GetProperty("Default").GetValue(this, null);
 
-                _resizeSettingsManager = new ResizeFormSettingsManager(_settings, this);
-                this.ResizeEnd += _resizeSettingsManager.OnResizeEnd;
-                this.Resize += _resizeSettingsManager.OnResize;
-                _resizeSettingsManager.LoadFormSettings(this);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибки при инициализации маштабирумости окна!\r\nОригинальный текст: " + ex.Message, 
-                    "Ошибка!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+                    _resizeSettingsManager = new ResizeFormSettingsManager(_settings, this);
+                    this.ResizeEnd += _resizeSettingsManager.OnResizeEnd;
+                    this.Resize += _resizeSettingsManager.OnResize;
+                    _resizeSettingsManager.LoadFormSettings(this);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибки при инициализации маштабирумости окна!\r\nОригинальный текст: " + ex.Message,
+                        "Ошибка!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
 
-            if (!this.IsDisposed)
-                base.OnLoad(e);
+                if (!this.IsDisposed)
+                    base.OnLoad(e);
+            }
         }
     }
 }

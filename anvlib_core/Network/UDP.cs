@@ -7,33 +7,42 @@ using System.Net.Sockets;
 
 namespace anvlib.Network
 {
+    //--на одном компе лучше не запускать сенд и рецив, надо принудительно как то убивать соккет!!!
+    //--это тестовый класс, только для примера работы Броадкаста
     public class UDP
     {
+        private int _port = 8585;
         private UdpClient udp = new UdpClient(8585);
+        public event EventHandler NewMsg;
 
-        public void test()
+        /*public UDP(int Port)
         {
-            //TcpListener tl = new TcpListener(1);
+            _port = Port;
+            udp = new UdpClient(_port);
+        }*/
+
+        public void SendBroadcastMessage(string message)
+        {            
             UdpClient ul = new UdpClient();
-            IPEndPoint ip = new IPEndPoint(IPAddress.Broadcast, 8585);
-            byte[] msg = ASCIIEncoding.ASCII.GetBytes("tvoyumat!");
-            ul.Send(msg, msg.Length, ip);
-            StartListening();
+            IPEndPoint ip = new IPEndPoint(IPAddress.Broadcast, _port);
+            byte[] msg = ASCIIEncoding.ASCII.GetBytes(message);
+            ul.Send(msg, msg.Length, ip);            
+            //StartListening();
         }
 
         public void StartListening()
         {
-            udp.BeginReceive(test2, new object());
+            if (udp != null)
+                udp.BeginReceive(ReceiveFromClient, new object());
         }
 
-        public void test2(IAsyncResult ar)
+        public void ReceiveFromClient(IAsyncResult ar)
         {
-            IPEndPoint ip = new IPEndPoint(IPAddress.Any, 8585);
+            IPEndPoint ip = new IPEndPoint(IPAddress.Any, _port);
             byte[] bytes = udp.EndReceive(ar, ref ip);
-            string message = Encoding.ASCII.GetString(bytes);
-            byte[] msg = ASCIIEncoding.ASCII.GetBytes("idi na hui!");
-            IPEndPoint ip1 = new IPEndPoint(ip.Address, 8585);
-            udp.Send(msg, msg.Length, ip1);
+            string message = Encoding.UTF8.GetString(bytes);
+            if (NewMsg != null)
+                NewMsg(message, new EventArgs());
             StartListening();
         }
     }

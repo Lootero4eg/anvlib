@@ -5,7 +5,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Drawing;
 
-namespace anvlib_unsafe.Utilites
+namespace anvlib.Utilites
 {
     public class IconExtractor
     {

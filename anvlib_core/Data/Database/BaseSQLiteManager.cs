@@ -131,7 +131,7 @@ namespace anvlib.Data.Database
             DbParameter tmpPar = _param;
 
             return tmpPar;
-        }
+        }        
 
         /// <summary>
         /// Метод создания таблицы из DataTable
@@ -202,9 +202,14 @@ namespace anvlib.Data.Database
 
                 if (_last_error == 0)//--Если табличка успешно создана, то надо ее заполнить 
                 {
-                    BeginTransaction();
-                    InsertDataToDb(table, _parameters_prefix);
-                    CommitTransaction();
+                    if (insert_method == DataInsertMethod.Normal)
+                        InsertDataToDb(table, _parameters_prefix);
+                    if (insert_method == DataInsertMethod.FastIfPossible)
+                    {
+                        BeginTransaction();
+                        InsertDataToDb(table, _parameters_prefix);
+                        CommitTransaction();
+                    }
                 }
             }
             else

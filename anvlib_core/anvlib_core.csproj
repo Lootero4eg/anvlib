@@ -135,6 +135,7 @@
     <Compile Include="Utilites\ArgsParser.cs" />
     <Compile Include="Utilites\AssemblyHelper.cs" />
     <Compile Include="Utilites\ConfigManager.cs" />
+    <Compile Include="Utilites\StringsParser.cs" />
     <Compile Include="Utilites\SystemTypeToDbTypeConverter.cs" />
     <Compile Include="Utilites\DbTypeToSystemTypeConverter.cs" />
     <Compile Include="Utilites\DigitToTextConverter.cs" />

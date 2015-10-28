@@ -10,6 +10,7 @@ using MySql.Data.Types;
 
 using anvlib.Classes.Attributes;
 using anvlib.Data.Database;
+using anvlib.Enums;
 
 namespace anvlib.Data.Database
 {
@@ -129,8 +130,49 @@ namespace anvlib.Data.Database
         /// <returns></returns>
         protected override DbParameter CreateParameter(string ParName, DbType ParType, int ParSize)
         {
-            throw new NotImplementedException();
-        }
+            #region Types Convert
+            MySqlDbType tmpType = MySqlDbType.Int32;
+            switch (ParType)
+            {
+                case DbType.String:
+                    tmpType = MySqlDbType.VarChar;
+                    break;
+
+                case DbType.Int16:
+                    tmpType = MySqlDbType.Int16;
+                    break;
+
+                case DbType.Int32:
+                    tmpType = MySqlDbType.Int32;
+                    break;
+
+                case DbType.Int64:
+                    tmpType = MySqlDbType.Int64;
+                    break;
+
+                case DbType.Boolean:
+                    tmpType = MySqlDbType.Bit;
+                    break;
+
+                case DbType.DateTime:
+                    tmpType = MySqlDbType.DateTime;
+                    break;
+
+                case DbType.Double:
+                    tmpType = MySqlDbType.Float;
+                    break;
+
+                case DbType.Guid:
+                    tmpType = MySqlDbType.VarChar;                    
+                    break;
+            }
+            #endregion
+
+            _param = new MySqlParameter(ParName, tmpType, ParSize);
+            DbParameter tmpPar = _param;
+
+            return tmpPar;
+        }        
 
         protected override void CreateLogin(string LoginName, string Paswword, string AdditionalOptions)
         {
@@ -142,10 +184,90 @@ namespace anvlib.Data.Database
             throw new NotImplementedException();
         }
 
-
         public override void CreateTable(DataTable table, DataInsertMethod insert_method)
         {
-            base.CreateTable(table, insert_method);
+            if (Connected)
+            {
+                base.CreateTable(table, insert_method);
+
+                string sqlsc;
+                sqlsc = "CREATE TABLE " + table.TableName + "(";
+                for (int i = 0; i < table.Columns.Count; i++)
+                {
+                    sqlsc += "\n" + table.Columns[i].ColumnName;
+                    if (table.Columns[i].DataType.ToString().Contains("System.Int32"))
+                        sqlsc += " int";
+                    else if (table.Columns[i].DataType.ToString().Contains("System.Int64"))//--если будут ошибки, то заменить на bigint
+                        sqlsc += " bigint";
+                    else if (table.Columns[i].DataType.ToString().Contains("System.DateTime"))
+                        sqlsc += " datetime";
+                    else if (table.Columns[i].DataType.ToString().Contains("System.Decimal"))
+                        sqlsc += " decimal";//--возможны ошибки
+                    else if (table.Columns[i].DataType.ToString().Contains("System.String"))
+                    {
+                        if (table.Columns[i].MaxLength <= 255)
+                            sqlsc += " varchar(" + (table.Columns[i].MaxLength > -1 ? table.Columns[i].MaxLength.ToString() : "50") + ")";
+                        else
+                            sqlsc += " text";
+                    }
+                    /*else if (table.Columns[i].DataType.ToString().Contains("System.Single")) //--незнаю какой тип его подменяет
+                        sqlsc += " single";*/
+                    else if (table.Columns[i].DataType.ToString().Contains("System.Double"))
+                        sqlsc += " double";
+                    else if (table.Columns[i].DataType.ToString().Contains("System.Guid"))
+                        sqlsc += " char(36)";
+                    else if (table.Columns[i].DataType.ToString().Contains("System.Boolean"))
+                        sqlsc += " tinyint(1)";
+                    else if (table.Columns[i].DataType.ToString().Contains("System.Byte"))
+                        sqlsc += " tinyint";
+                    else if (table.Columns[i].DataType.ToString().Contains("System.Int16"))
+                        sqlsc += " smallint";
+                    else
+                        sqlsc += " varchar(" + (table.Columns[i].MaxLength > -1 ? table.Columns[i].MaxLength.ToString() : "50") + ")";
+
+
+                    if (table.Columns[i].AutoIncrement)
+                        sqlsc += " AUTO_INCREMENT";// +table.Columns[i].AutoIncrementSeed.ToString() + "," + table.Columns[i].AutoIncrementStep.ToString() + ")";
+                    if (!table.Columns[i].AllowDBNull)
+                        sqlsc += " NOT NULL ";
+                    if (table.Columns[i].DefaultValue != null && table.Columns[i].DefaultValue != DBNull.Value)
+                        sqlsc += " DEFAULT " + table.Columns[i].DefaultValue.ToString();
+                    sqlsc += ",";
+                }
+
+                if (table.PrimaryKey.Length > 0)
+                {
+                    string pks = "\nCONSTRAINT PK_" + table.TableName + " PRIMARY KEY (";
+                    for (int i = 0; i < table.PrimaryKey.Length; i++)
+                    {
+                        pks += table.PrimaryKey[i].ColumnName + ",";
+                    }
+                    pks = pks.Substring(0, pks.Length - 1) + ")";
+                    sqlsc += pks;
+                    sqlsc = sqlsc + ");";
+                }
+                else
+                    sqlsc = sqlsc.Substring(0, sqlsc.Length - 1) + ");";
+
+                ExecuteCommand(CreateCommand(sqlsc).ExecuteNonQuery);
+
+                if (_last_error == 0)//--Если табличка успешно создана, то надо ее заполнить       
+                {                    
+                    if (insert_method == DataInsertMethod.Normal)
+                        InsertDataToDb(table, _parameters_prefix);
+                    if (insert_method == DataInsertMethod.FastIfPossible)
+                    {
+                        BeginTransaction();
+                        InsertDataToDb(table, _parameters_prefix);
+                        CommitTransaction();
+                    }
+                }
+            }
+            else
+            {
+                if (MessagePrinter != null)
+                    MessagePrinter.PrintMessage(MsgMgr.MessageText.NotConnectedMsg, MsgMgr.MessageText.ErrorMsg, 1, 1);
+            }
         }
 
         public override void DropTable(string TableName)
@@ -209,12 +331,7 @@ namespace anvlib.Data.Database
             }
 
             return null;
-        }
-
-        /*protected override void InsertDataToDb(DataTable table, string parameters_prefix)
-        {
-            base.InsertDataToDb(table, parameters_prefix);
-        }*/
+        }        
 
         /// <summary>
         /// Метод, проверяющий наличие объекта в базе данных по имени
@@ -223,14 +340,70 @@ namespace anvlib.Data.Database
         /// <param name="obj_type">Тип объекта(таблица, триггер и т.д.)</param>
         /// <param name="CaseSensivity">Чувствительность регистра</param>
         /// <returns></returns>
-        public override bool IsDBObjectExists(string obj_name, Enums.DataBaseObjects obj_type, bool CaseSensivity)
+        public override bool IsDBObjectExists(string obj_name, DataBaseObjects obj_type, bool CaseSensivity)
         {
-            throw new NotImplementedException();
+            string sql = "";            
+            switch (obj_type)
+            { 
+                case DataBaseObjects.table:
+                    if (CaseSensivity)
+                        sql = string.Format("select 1 from information_schema.TABLES where table_name='{0}'", obj_name);
+                    else
+                        sql = string.Format("select 1 from information_schema.TABLES where lower(table_name)=lower('{0}')", obj_name);
+                    break;
+            }
+
+            var res = ExecuteScalarCommand(CreateCommand(sql).ExecuteScalar);
+
+            if (res != null && res != DBNull.Value)
+                return true;
+
+            return false;
         }
 
         protected override DataTable GetTablePrimaryKey(DataTable table, bool CaseSensivitye)
         {
             return table;
+        }
+
+        //--У данного драйвера DataAdapter сам вытаскивает Primary Keys,Nullable, MaxLength and Precision. Жаль что Дефолты еще не вытаскивает!
+        public override DataTable GetTableFromDb(string tablename, bool with_primary_key, bool with_max_string_length, bool with_default_values, bool CaseSensivity)
+        {
+            return base.GetTableFromDb(tablename, with_primary_key, with_max_string_length, with_default_values, CaseSensivity);
+        }
+
+        internal override DbColumnInformation GetDbColumnInformation(string tablename, string columnname, bool CaseSensivity)
+        {
+            DbColumnInformation res = base.GetDbColumnInformation(tablename, columnname, CaseSensivity);
+            string sql = "";
+            if (!CaseSensivity)
+            {
+                sql = "select * from information_schema.columns where lower(table_name)=lower('{0}') and lower(column_name)=lower('{1}')";
+                if (!string.IsNullOrEmpty(_owner))
+                    sql += " and lower(table_schema)=lower('{2}')";
+            }
+            else
+            {
+                sql = "select * from information_schema.columns where table_name='{0}' and column_name='{1}'";
+                if (!string.IsNullOrEmpty(_owner))
+                    sql += " and table_schema='{2}'";
+            }
+
+            if (string.IsNullOrEmpty(_owner))
+                sql = string.Format(sql, tablename, columnname);
+            else
+                sql = string.Format(sql, tablename, columnname, _owner);
+
+            _DR = ExecuteDataReader(CreateCommand(sql).ExecuteReader);
+            while (_DR.Read())
+            {
+                if (_DR["column_default"] != null && _DR["column_default"] != DBNull.Value)
+                    res.DefaultValue = _DR["column_default"];
+                break;
+            }
+            _DR.Close();
+
+            return res;
         }
     }
 }

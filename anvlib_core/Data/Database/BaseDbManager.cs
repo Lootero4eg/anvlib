@@ -52,7 +52,8 @@ namespace anvlib.Data.Database
         /// </summary>
         public BaseDbManager()
         {
-            MessagePrinter = new ExceptionPrintMessageSystem();
+            if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Runtime)
+                MessagePrinter = new ExceptionPrintMessageSystem();
         }
 
         /// <summary>
@@ -197,7 +198,7 @@ namespace anvlib.Data.Database
         /// <param name="ParType">Тип параметра</param>
         /// <param name="ParSize">Размер параметра. Для строковых параметров и параметров с плавающей точкой</param>
         /// <returns></returns>
-        protected abstract DbParameter CreateParameter(string ParName, DbType ParType, int ParSize);
+        protected abstract DbParameter CreateParameter(string ParName, DbType ParType, int ParSize);        
 
         /// <summary>
         /// Метод создание таблицы
@@ -339,6 +340,8 @@ namespace anvlib.Data.Database
             
         }
 
+        //--Сделать вытаскивание индексов!!!!
+        [Incomplete]//--Работает только с таблицами до 8 миллионов записей, далее вылетает System.OutOfMemoryException
         public virtual DataTable GetTableFromDb(string tablename, bool with_primary_key, bool with_max_string_length, bool with_default_values, bool CaseSensivity)
         {
             _dt = new DataTable(tablename);
@@ -373,15 +376,17 @@ namespace anvlib.Data.Database
             PrepareTableSchemeBeforeFill(_dt);
             _DA.Fill(_dt);
 
+#warning перенести код ниже в PrepareTableSchemeBeforeFill
             //--описание колонок 
             foreach (DataColumn col in _dt.Columns)
             {                
                 var col_info = GetDbColumnInformation(tablename, col.ColumnName, CaseSensivity);
-                col.AllowDBNull = col_info.IsNullable;
+                if (col_info.AdditionalInfo!=null && col_info.AdditionalInfo.ToString() != "default")
+                    col.AllowDBNull = col_info.IsNullable;
                 if (with_max_string_length)
                 {
                     if (col.DataType == typeof(string))
-                        if (col_info.MaxLength > 0)
+                        if (col_info.MaxLength > 0 && col_info.MaxLength > col.MaxLength)
                             col.MaxLength = col_info.MaxLength;
                 }
 
@@ -416,11 +421,12 @@ namespace anvlib.Data.Database
 
             res.MaxLength = 50;
             res.IsNullable = true;
+            res.AdditionalInfo = "default";
 
             return res;
         }
 
-        internal virtual void PrepareTableSchemeBeforeFill(DataTable table) { }
+        internal virtual void PrepareTableSchemeBeforeFill(DataTable table) {}        
 
         #endregion
     }

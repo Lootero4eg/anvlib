@@ -129,7 +129,7 @@ namespace anvlib.Data.Database
                 connstr = string.Format("server={0};uid={1};pwd={2};database={3};MultipleActiveResultSets=true",
                     srvname, login, password, database);
             else
-                connstr = string.Format("server={0};Integrated Security=SSPI;database={2}",
+                connstr = string.Format("server={0};Integrated Security=SSPI;database={2};MultipleActiveResultSets=true",
                     srvname, login, database);
 
             return connstr;
@@ -227,45 +227,8 @@ namespace anvlib.Data.Database
         /// <returns></returns>
         protected override DbParameter CreateParameter(string ParName, DbType ParType, int ParSize)
         {
-            #region Types Convert
-            SqlDbType tmpType = SqlDbType.Int;
-            switch (ParType)
-            {
-                case DbType.String:
-                    tmpType = SqlDbType.VarChar;
-                    break;
-
-                case DbType.Int16:
-                    tmpType = SqlDbType.Int;
-                    break;
-
-                case DbType.Int32:
-                    tmpType = SqlDbType.Int;
-                    break;
-
-                case DbType.Int64:
-                    tmpType = SqlDbType.BigInt;
-                    break;
-
-                case DbType.Boolean:
-                    tmpType = SqlDbType.Bit;
-                    break;
-
-                case DbType.DateTime:
-                    tmpType = SqlDbType.DateTime;
-                    break;
-
-                case DbType.Double:
-                    tmpType = SqlDbType.Float;
-                    break;
-
-                case DbType.Guid:
-                    tmpType = SqlDbType.UniqueIdentifier;
-                    break;
-            }
-            #endregion
-
-            _param = new SqlParameter(ParName, tmpType, ParSize);
+            //--если параметр типа VarBinary, то чтобы он заработал, надо преобразовать DbCommand к SqlCommand и сделать в Parameters.AddWithValue!!!!!!!
+            _param = new SqlParameter(ParName, ParameterTypeConverter(ParType), ParSize);
             DbParameter tmpPar = _param;
 
             return tmpPar;
@@ -355,10 +318,10 @@ namespace anvlib.Data.Database
                     else if (table.Columns[i].DataType.ToString().Contains("System.DateTime"))
                         sqlsc += " datetime";
                     else if (table.Columns[i].DataType.ToString().Contains("System.Decimal"))
-                        sqlsc += " float";
+                        sqlsc += " decimal";//--возможны ошибки
                     else if (table.Columns[i].DataType.ToString().Contains("System.String"))
                     {
-                        if (table.Columns[i].MaxLength < 8000)
+                        if (table.Columns[i].MaxLength <= 8000)
                             sqlsc += " varchar(" + (table.Columns[i].MaxLength > -1 ? table.Columns[i].MaxLength.ToString() : "50") + ")";
                         else
                             sqlsc += " text";
@@ -410,6 +373,11 @@ namespace anvlib.Data.Database
                         InsertDataToDb(table, _parameters_prefix);
                     if (insert_method == DataInsertMethod.FastIfPossible)
                         InsertDataToDbBulkMethod(table);
+                }
+                else
+                {
+                    if (MessagePrinter != null)
+                        MessagePrinter.PrintMessage(MsgMgr.MessageText.DBErrorMsg, MsgMgr.MessageText.ErrorMsg, 1, 1);
                 }
             }
             else
@@ -723,7 +691,7 @@ namespace anvlib.Data.Database
             SqlBulkCopy bcopy = new SqlBulkCopy(_conn as SqlConnection);
             bcopy.DestinationTableName = table.TableName;
             bcopy.WriteToServer(table);
-            bcopy.Close();
+            bcopy.Close();            
         }
 
         private object DefValuePostProcessing(object defval)
@@ -748,6 +716,55 @@ namespace anvlib.Data.Database
             }
 
             return defval;
+        }
+
+        protected SqlDbType ParameterTypeConverter(DbType ParType)
+        {            
+            SqlDbType tmpType = SqlDbType.Int;
+            switch (ParType)
+            {
+                case DbType.Binary:
+                    tmpType = SqlDbType.VarBinary;
+                    break;
+
+                case DbType.String:
+                    tmpType = SqlDbType.VarChar;
+                    break;
+
+                case DbType.Int16:
+                    tmpType = SqlDbType.Int;
+                    break;
+
+                case DbType.Int32:
+                    tmpType = SqlDbType.Int;
+                    break;
+
+                case DbType.Int64:
+                    tmpType = SqlDbType.BigInt;
+                    break;
+
+                case DbType.Boolean:
+                    tmpType = SqlDbType.Bit;
+                    break;
+
+                case DbType.DateTime:
+                    tmpType = SqlDbType.DateTime;
+                    break;
+
+                case DbType.Double:
+                    tmpType = SqlDbType.Float;
+                    break;
+
+                case DbType.Guid:
+                    tmpType = SqlDbType.UniqueIdentifier;
+                    break;
+
+                case DbType.Xml:
+                    tmpType = SqlDbType.Xml;
+                    break;
+            }
+
+            return tmpType;
         }
     }
 }

@@ -13,7 +13,7 @@ namespace anvlib.Controls
             if (e.Button == System.Windows.Forms.MouseButtons.Right)
                 this.SelectedNode = this.GetNodeAt(e.Location);
 
-            base.OnMouseClick(e); //anvlib.Controls.Designers.TypedTreeViewDesigner;
+            base.OnMouseClick(e);
         }        
     }    
 }
