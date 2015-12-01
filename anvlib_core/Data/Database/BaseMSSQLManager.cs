@@ -58,7 +58,7 @@ namespace anvlib.Data.Database
             {
                 string msg = GetErrorMessage(ex);
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(msg, MsgMgr.MessageText.DBErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(msg, ErrorsManager.Messages.DBErrorMsg, 1, 1);
             }
         }
 
@@ -249,7 +249,7 @@ namespace anvlib.Data.Database
             {
                 string msg = GetErrorMessage(e);
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(msg, MsgMgr.MessageText.DBErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(msg, ErrorsManager.Messages.DBErrorMsg, 1, 1);
             }
         }
 
@@ -268,7 +268,7 @@ namespace anvlib.Data.Database
             {
                 string msg = GetErrorMessage(e);
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(msg, MsgMgr.MessageText.DBErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(msg, ErrorsManager.Messages.DBErrorMsg, 1, 1);
             }
 
             return null;
@@ -289,7 +289,7 @@ namespace anvlib.Data.Database
             {
                 string msg = GetErrorMessage(e);
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(msg, MsgMgr.MessageText.DBErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(msg, ErrorsManager.Messages.DBErrorMsg, 1, 1);
             }
 
             return null;
@@ -377,13 +377,13 @@ namespace anvlib.Data.Database
                 else
                 {
                     if (MessagePrinter != null)
-                        MessagePrinter.PrintMessage(MsgMgr.MessageText.DBErrorMsg, MsgMgr.MessageText.ErrorMsg, 1, 1);
+                        MessagePrinter.PrintMessage(ErrorsManager.Messages.DBErrorMsg, ErrorsManager.Messages.ErrorMsg, 1, 1);
                 }
             }
             else
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(MsgMgr.MessageText.NotConnectedMsg, MsgMgr.MessageText.ErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(ErrorsManager.Messages.NotConnectedMsg, ErrorsManager.Messages.ErrorMsg, 1, 1);
             }
         }        
 
@@ -420,7 +420,7 @@ namespace anvlib.Data.Database
             else
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(MsgMgr.MessageText.NotConnectedMsg, MsgMgr.MessageText.ErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(ErrorsManager.Messages.NotConnectedMsg, ErrorsManager.Messages.ErrorMsg, 1, 1);
             }
 
             return false;
@@ -430,19 +430,18 @@ namespace anvlib.Data.Database
         {
             string msg = exp.Message;
             if (exp.Number == 201)
-                msg = string.Format("{0}{1}", MsgMgr.MessageText.SQLSERVER_201, exp.Message);
+                msg = string.Format("{0}{1}", ErrorsManager.Messages.SQLSERVER_201, exp.Message);
 
             if (exp.Number == 229)
-                msg = string.Format("{0}{1}", MsgMgr.MessageText.SQLSERVER_229, exp.Message);
+                msg = string.Format("{0}{1}", ErrorsManager.Messages.SQLSERVER_229, exp.Message);
 
             if (exp.Number == 547)
-                msg = string.Format("{0}{1}", MsgMgr.MessageText.SQLSERVER_547, exp.Message);
+                msg = string.Format("{0}{1}", ErrorsManager.Messages.SQLSERVER_547, exp.Message);
 
             if (exp.Number == 18456)
-                msg = string.Format("{0}{1}", MsgMgr.MessageText.SQLSERVER_18456, exp.Message);
+                msg = string.Format("{0}{1}", ErrorsManager.Messages.SQLSERVER_18456, exp.Message);
 
-            _last_error = exp.Number;
-            RaiseExecuteException(_last_error);
+            _last_error = exp.Number;            
 
             return msg;
         }

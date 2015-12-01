@@ -10,9 +10,14 @@ namespace anvlib.Classes.PrintMessageSystems
 {
     public class MessageBoxPrintSystem: IPrintMessageSystem
     {
+        public event EventHandler MessagePrinted;
+
         public void PrintMessage(string Msg)
         {
             MessageBox.Show(Msg);
+
+            if (MessagePrinted != null)
+                MessagePrinted(Msg, new EventArgs());
         }
 
         public void PrintMessage(string Msg, string WindowTitle, int Buttons, int Icon)
@@ -73,6 +78,9 @@ namespace anvlib.Classes.PrintMessageSystems
             }
 
             MessageBox.Show(Msg, WindowTitle, buttons, icon);
+
+            if (MessagePrinted != null)
+                MessagePrinted(Msg, new EventArgs());
         }
     }
 }

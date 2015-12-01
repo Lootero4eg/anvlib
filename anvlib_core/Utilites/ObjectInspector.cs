@@ -62,6 +62,16 @@ namespace anvlib.Utilites
         {
             if (obj != null)
             {
+                if (prop_name.IndexOf('.') > -1)//--Многоуровневневый поиск
+                {
+                    string[] properties = prop_name.Split('.');
+                    object obj2 = obj;
+                    for (int i = 0; i < properties.Length; i++)
+                    {
+                        SetObjectPropertyValue(obj2, properties[i], prop_value);//--не отладено!
+                    }                    
+                }
+
                 if (HasObjectPropertyByName(obj, prop_name))
                     obj.GetType().GetProperty(prop_name).SetValue(obj, prop_value, null);
             }
@@ -71,6 +81,18 @@ namespace anvlib.Utilites
         {
             if (obj != null)
             {
+                if (prop_name.IndexOf('.') > -1)//--Многоуровневневый поиск
+                {
+                    string[] properties = prop_name.Split('.');
+                    object obj2 = obj;
+                    for (int i = 0; i < properties.Length; i++)
+                    {
+                        obj2 = GetObjectPropertyValue(obj2, properties[i]);
+                    }
+
+                    return obj2;
+                }
+
                 if (HasObjectPropertyByName(obj, prop_name))
                     return obj.GetType().GetProperty(prop_name).GetValue(obj, null);
             }

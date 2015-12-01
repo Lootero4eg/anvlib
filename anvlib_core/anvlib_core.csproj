@@ -46,6 +46,7 @@
     <Reference Include="mysql.data, Version=6.9.7.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\LIBRARIES\mysql-1.2.4\v4\mysql.data.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Npgsql">
       <HintPath>..\anvlib\References DLLs\Npgsql.dll</HintPath>
@@ -74,6 +75,7 @@
     <Compile Include="Classes\Attributes\ExperimentalAttribute.cs" />
     <Compile Include="Classes\Base\BaseCommonObject.cs" />
     <Compile Include="Classes\Base\BaseCommonStruct.cs" />
+    <Compile Include="Classes\PrintMessageSystems\NullPrintMessageSystem.cs" />
     <Compile Include="Data\Database\BaseDbManager.cs" />
     <Compile Include="Data\Database\BaseMSSQLManager.cs" />
     <Compile Include="Classes\Base\BaseOptions.cs" />
@@ -88,10 +90,10 @@
     <Compile Include="Data\CSV_TXT_TableWriter.cs" />
     <Compile Include="Data\Database\BaseSQLiteManager.cs" />
     <Compile Include="Data\Database\DbClassesAndStruct.cs" />
-    <Compile Include="Data\Database\Messages\DbMsgManager.cs" />
-    <Compile Include="Data\Database\Messages\en-US.cs" />
+    <Compile Include="Data\Database\Messages\ErrorMessageManager.cs" />
+    <Compile Include="Data\Database\Messages\en-US_DbMessages.cs" />
     <Compile Include="Data\Database\Messages\IDBMessages.cs" />
-    <Compile Include="Data\Database\Messages\ru-RU.cs" />
+    <Compile Include="Data\Database\Messages\ru_RU_ErrorDbMessages.cs" />
     <Compile Include="Data\DataTableCreator.cs" />
     <Compile Include="Data\DTC_Column.cs" />
     <Compile Include="Data\ExportTableMethods\Database_EportMethod.cs" />

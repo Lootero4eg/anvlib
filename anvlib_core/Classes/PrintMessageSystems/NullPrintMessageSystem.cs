@@ -7,20 +7,20 @@ using anvlib.Interfaces;
 
 namespace anvlib.Classes.PrintMessageSystems
 {
-    public class ConsolePrintMessageSystem : IPrintMessageSystem
+    public class NullPrintMessageSystem : IPrintMessageSystem
     {
         public event EventHandler MessagePrinted;
 
         public void PrintMessage(string Msg)
-        {
-            Console.WriteLine(Msg);
+        {        
             if (MessagePrinted != null)
                 MessagePrinted(Msg, new EventArgs());
         }
 
         public void PrintMessage(string Msg, string WindowTitle, int Buttons, int Icon)
         {
-            PrintMessage(Msg);
+            if (MessagePrinted != null)
+                MessagePrinted(Msg, new EventArgs());
         }
     }
 }

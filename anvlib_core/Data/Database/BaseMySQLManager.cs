@@ -42,7 +42,7 @@ namespace anvlib.Data.Database
             catch (MySqlException ex)
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(ex.Message, MsgMgr.MessageText.DBErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(ex.Message, ErrorsManager.Messages.DBErrorMsg, 1, 1);
             }
         }
 
@@ -266,7 +266,7 @@ namespace anvlib.Data.Database
             else
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(MsgMgr.MessageText.NotConnectedMsg, MsgMgr.MessageText.ErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(ErrorsManager.Messages.NotConnectedMsg, ErrorsManager.Messages.ErrorMsg, 1, 1);
             }
         }
 
@@ -289,7 +289,9 @@ namespace anvlib.Data.Database
             catch (MySqlException e)
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(e.Message, MsgMgr.MessageText.DBErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(e.Message, ErrorsManager.Messages.DBErrorMsg, 1, 1);
+
+                _last_error = e.ErrorCode;
             }
         }
 
@@ -307,7 +309,9 @@ namespace anvlib.Data.Database
             catch (MySqlException e)
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(e.Message, MsgMgr.MessageText.DBErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(e.Message, ErrorsManager.Messages.DBErrorMsg, 1, 1);
+
+                _last_error = e.ErrorCode;
             }
 
             return null;
@@ -327,7 +331,9 @@ namespace anvlib.Data.Database
             catch (MySqlException e)
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(e.Message, MsgMgr.MessageText.DBErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(e.Message, ErrorsManager.Messages.DBErrorMsg, 1, 1);
+
+                _last_error = e.ErrorCode;
             }
 
             return null;

@@ -44,7 +44,7 @@ namespace anvlib.Data.Database
             catch (SQLiteException ex)
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(ex.Message, MsgMgr.MessageText.DBErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(ex.Message, ErrorsManager.Messages.DBErrorMsg, 1, 1);
             }
         }
 
@@ -215,7 +215,7 @@ namespace anvlib.Data.Database
             else
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(MsgMgr.MessageText.NotConnectedMsg, MsgMgr.MessageText.ErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(ErrorsManager.Messages.NotConnectedMsg, ErrorsManager.Messages.ErrorMsg, 1, 1);
             }
         }
 
@@ -256,7 +256,7 @@ namespace anvlib.Data.Database
             else
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(MsgMgr.MessageText.NotConnectedMsg, MsgMgr.MessageText.ErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(ErrorsManager.Messages.NotConnectedMsg, ErrorsManager.Messages.ErrorMsg, 1, 1);
             }
 
             return false;
@@ -307,12 +307,12 @@ namespace anvlib.Data.Database
 
         protected override void CreateLogin(string LoginName, string Paswword, string AdditionalOptions)
         {
-            throw new Exception(MsgMgr.MessageText.UsersManagmentIsNotSupported);
+            throw new Exception(ErrorsManager.Messages.UsersManagmentIsNotSupported);
         }
 
         protected override void DeleteLogin(string LoginName, string AdditionalOptions)
         {
-            throw new Exception(MsgMgr.MessageText.UsersManagmentIsNotSupported);
+            throw new Exception(ErrorsManager.Messages.UsersManagmentIsNotSupported);
         }
 
         /// <summary>
@@ -329,7 +329,9 @@ namespace anvlib.Data.Database
             catch (SQLiteException e)
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(e.Message, MsgMgr.MessageText.DBErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(e.Message, ErrorsManager.Messages.DBErrorMsg, 1, 1);
+
+                _last_error = e.ErrorCode;
             }
         }
 
@@ -347,7 +349,9 @@ namespace anvlib.Data.Database
             catch (SQLiteException e)
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(e.Message, MsgMgr.MessageText.DBErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(e.Message, ErrorsManager.Messages.DBErrorMsg, 1, 1);
+
+                _last_error = e.ErrorCode;
             }
 
             return null;
@@ -367,7 +371,9 @@ namespace anvlib.Data.Database
             catch (SQLiteException e)
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(e.Message, MsgMgr.MessageText.DBErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(e.Message, ErrorsManager.Messages.DBErrorMsg, 1, 1);
+
+                _last_error = e.ErrorCode;
             }
 
             return null;

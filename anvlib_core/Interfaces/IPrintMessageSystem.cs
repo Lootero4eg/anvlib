@@ -38,5 +38,7 @@ namespace anvlib.Interfaces
         /// 9 - None
         /// </param>
         void PrintMessage(string Msg, string WindowTitle, int Buttons, int Icon);
+
+        event EventHandler MessagePrinted;
     }
 }

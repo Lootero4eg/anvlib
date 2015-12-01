@@ -8,9 +8,14 @@ using anvlib.Interfaces;
 namespace anvlib.Classes.PrintMessageSystems
 {
     public class ExceptionPrintMessageSystem: IPrintMessageSystem
-    {        
+    {
+        public event EventHandler MessagePrinted;
+
         public void PrintMessage(string Msg)
         {
+            if (MessagePrinted != null)
+                MessagePrinted(Msg, new EventArgs());
+
             throw new Exception(Msg);
         }
 

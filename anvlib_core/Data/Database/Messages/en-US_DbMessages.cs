@@ -5,7 +5,7 @@ using System.Text;
 
 namespace anvlib.Data.Database.Messages
 {
-    public sealed class en_US : IDBMessages
+    public sealed class en_US_ErrorDbMessages : IDBMessages
     {
         private const string error_text = "Error";
         private const string dberror_text = "Database error";

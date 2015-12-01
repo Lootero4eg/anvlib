@@ -42,8 +42,9 @@ namespace anvlib.Data.Database
 
         protected int _last_error = 0;
 
+        //--Может использоваться не только для ошибок! Но и когда надо напечатать какое-то сообщение из методов менеджера
         protected IPrintMessageSystem MessagePrinter;
-        protected DbMsgManager MsgMgr = new DbMsgManager();
+        protected ErrorMessageManager ErrorsManager = new ErrorMessageManager();
 
         #region BaseDbManager Properties & Methods
 
@@ -53,7 +54,7 @@ namespace anvlib.Data.Database
         public BaseDbManager()
         {
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Runtime)
-                MessagePrinter = new ExceptionPrintMessageSystem();
+                SetPrintMessageSystem(new ExceptionPrintMessageSystem());                
         }
 
         /// <summary>
@@ -142,7 +143,7 @@ namespace anvlib.Data.Database
             if (Connected)
             {
                 if (_transaction != null)
-                    throw new Exception(MsgMgr.MessageText.TransactionNotEndedMsg);
+                    throw new Exception(ErrorsManager.Messages.TransactionNotEndedMsg);
 
                 _conn.Close();
             }
@@ -165,7 +166,7 @@ namespace anvlib.Data.Database
                 catch (Exception e)
                 {
                     if (MessagePrinter != null)
-                        MessagePrinter.PrintMessage(e.Message, MsgMgr.MessageText.DBErrorMsg, 1, 1);
+                        MessagePrinter.PrintMessage(e.Message, ErrorsManager.Messages.DBErrorMsg, 1, 1);
                 }
             }
         }
@@ -210,7 +211,7 @@ namespace anvlib.Data.Database
             if (string.IsNullOrEmpty(table.TableName))
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(MsgMgr.MessageText.DatatableNameNotFoundMsg, MsgMgr.MessageText.ErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(ErrorsManager.Messages.DatatableNameNotFoundMsg, ErrorsManager.Messages.ErrorMsg, 1, 1);
 
                 return;
             }
@@ -218,7 +219,7 @@ namespace anvlib.Data.Database
             if (table.Columns.Count <= 0)
             {
                 if (MessagePrinter != null)
-                    MessagePrinter.PrintMessage(MsgMgr.MessageText.DatatableColumnsNotFoundMsg, MsgMgr.MessageText.ErrorMsg, 1, 1);
+                    MessagePrinter.PrintMessage(ErrorsManager.Messages.DatatableColumnsNotFoundMsg, ErrorsManager.Messages.ErrorMsg, 1, 1);
 
                 return;
             }
@@ -254,7 +255,7 @@ namespace anvlib.Data.Database
             if (Connected)
                 _transaction = _conn.BeginTransaction(IsolationLevel.ReadCommitted);
             else
-                throw new Exception(MsgMgr.MessageText.NotConnectedMsg);
+                throw new Exception(ErrorsManager.Messages.NotConnectedMsg);
         }
 
         /// <summary>
@@ -268,7 +269,7 @@ namespace anvlib.Data.Database
                 _transaction = null;
             }
             else
-                throw new Exception(MsgMgr.MessageText.TransactionNotStartedMsg);
+                throw new Exception(ErrorsManager.Messages.TransactionNotStartedMsg);
         }
 
         /// <summary>
@@ -282,12 +283,13 @@ namespace anvlib.Data.Database
                 _transaction = null;
             }
             else
-                throw new Exception(MsgMgr.MessageText.TransactionNotStartedMsg);
+                throw new Exception(ErrorsManager.Messages.TransactionNotStartedMsg);
         }
 
         public void SetPrintMessageSystem(IPrintMessageSystem MsgSystem)
         {
             MessagePrinter = MsgSystem;
+            MessagePrinter.MessagePrinted += OnMessagePrinted;
         }
 
         protected delegate int ExecuteCmdDelegate();
@@ -308,10 +310,43 @@ namespace anvlib.Data.Database
 
         protected abstract DbDataReader ExecuteDataReader(ExecuteDataReaderCmdDelegate proc);
 
+        protected bool IsDataReaderHasColumn(string ColumnName, bool CaseSensivity)
+        {
+            if (_DR != null && !_DR.IsClosed)
+            {
+                for (int i = 0; i < _DR.FieldCount; i++)
+                {
+                    if (CaseSensivity)
+                    {
+                        if (_DR.GetName(i) == ColumnName)
+                            return true;
+                    }
+                    else
+                    {
+                        if (_DR.GetName(i).ToLower() == ColumnName.ToLower())
+                            return true;
+                    }
+                }
+                return false;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Метод придуман для того, чтобы тот, кто подписан на этот эвент из вне, мог узнать что произошел сбой выполнения
+        /// </summary>
+        /// <param name="err_code"></param>
         protected void RaiseExecuteException(int err_code)
         {
             if (ExecutionException != null)
                 ExecutionException(err_code, new EventArgs());
+        }
+
+        protected virtual void OnMessagePrinted(object sender,EventArgs e)
+        {
+            if(_last_error!=0)
+                RaiseExecuteException(_last_error);
         }
 
         protected abstract void CreateLogin(string LoginName, string Paswword, string AdditionalOptions);
