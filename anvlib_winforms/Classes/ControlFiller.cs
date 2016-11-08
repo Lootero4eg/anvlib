@@ -286,7 +286,7 @@ namespace anvlib.Classes
                                 {
                                     if (SubLeaf.DataSourceName != null)
                                     {
-                                        if (Leaf.DataSourceName != SubLeaf.DataSourceName)
+                                        if (Leaf.DataSourceName != SubLeaf.DataSourceName || SubLeaf.IsRecusiveCollection)
                                         {
                                             //--переделать на DisplayCaption
                                             if (!string.IsNullOrEmpty(SubLeaf.DisplayMember) && !string.IsNullOrEmpty(SubLeaf.DisplayСaption))

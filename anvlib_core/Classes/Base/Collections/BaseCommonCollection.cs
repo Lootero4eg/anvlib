@@ -15,6 +15,7 @@ namespace anvlib.Classes.Base.Collections
     /// Базовая коллекция стандартных объектов
     /// </summary>
     /// <typeparam name="T"></typeparam>
+    [Obsolete] //--нигде не используется, незнаю зачем я ее делал, наверное для примера
     public class BaseCommonCollection<T> : Collection<T>, IBaseCommonCollection where T : BaseCommonObject, new()
     {
         private bool _isReadOnly = false;

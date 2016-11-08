@@ -18,6 +18,7 @@ namespace anvlib.Classes
     public class TypedTreeViewDisplayMember
     {        
         private bool _withoutTag = false;
+        private bool _isRecursiveCollection = false;
         private int _imageIndex = -1;
         private int _selectedImageIndex = -1;
         private int _stateImageIndex = -1;
@@ -52,6 +53,10 @@ namespace anvlib.Classes
         [CategoryAttribute("Источник данных и отображение")]
         [Description("Источник данных: имя коллекции в классе или имя таблицы в датасете. Если сам источник является таблицей, то оставить пустым")]        
         public string DataSourceName { get; set; }
+
+        [CategoryAttribute("Источник данных и отображение")]
+        [Description("Флаг указывающий контрол филлеру, что это рекурсивная коллекция и надо брать следующий ее уровень, а не самый верхний")]
+        public bool IsRecusiveCollection { get { return _isRecursiveCollection; } set { _isRecursiveCollection = value; } }
 
         /// <summary>
         /// Флаг указывающий контрол филлеру, чтобы он не заполнял поле тэг
@@ -169,6 +174,7 @@ namespace anvlib.Classes
             res.SelectedImageIndex = this.SelectedImageIndex;
             res.StateImageIndex = this.StateImageIndex;
             res.WithoutTag = this.WithoutTag;
+            res.IsRecusiveCollection = this.IsRecusiveCollection;
             foreach (var item in this.ChildDisplayMembers)            
                 res.ChildDisplayMembers.Add(item.Clone());            
 
