@@ -368,11 +368,17 @@ namespace anvlib.Data.Database
             
             _DA = CreateDataAdapter("");
             var ins_cmd = CreateCommand(insert_sql);
-            ins_cmd.Parameters.AddRange(insert_params);            
+            ins_cmd.Parameters.AddRange(insert_params);
 
-            _DA.InsertCommand = ins_cmd;
-            _DA.Update(table);
-            
+            try
+            {
+                _DA.InsertCommand = ins_cmd;
+                _DA.Update(table);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }            
         }
 
         //--Сделать вытаскивание индексов!!!!

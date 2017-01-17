@@ -210,6 +210,7 @@ namespace anvlib.Data.Database
 
         public override void CreateTable(DataTable table, DataInsertMethod insert_method) 
         {
+            //insert_method = DataInsertMethod.Normal;
             if (Connected)
             {
                 base.CreateTable(table, insert_method);
@@ -391,18 +392,17 @@ namespace anvlib.Data.Database
             _cmd = CreateCommand(sql);
             _cmd.CommandType = CommandType.Text;
             var serializer = new NpgsqlCopySerializer(_conn as NpgsqlConnection);
-            NpgsqlCopyIn copyIn = new NpgsqlCopyIn((_cmd as NpgsqlCommand), (_conn as NpgsqlConnection), serializer.ToStream);
-
+            NpgsqlCopyIn copyIn = new NpgsqlCopyIn((_cmd as NpgsqlCommand), (_conn as NpgsqlConnection), serializer.ToStream);            
             try
             {
                 copyIn.Start();
                 foreach (DataRow dr in table.Rows)
                 {
-                    for (int i = 0; i < table.Columns.Count; i++)
-                        AddValueToSerializer(serializer, dr[i]);
+                    for (int i = 0; i < table.Columns.Count; i++)                                            
+                        AddValueToSerializer(serializer, dr[i]);                    
 
                     serializer.EndRow();
-                    serializer.Flush();
+                    serializer.Flush();                    
                 }
                 copyIn.End();
                 serializer.Close();

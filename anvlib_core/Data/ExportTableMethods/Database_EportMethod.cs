@@ -23,7 +23,7 @@ namespace anvlib.Data.ExportTableMethods
 
         public Database_EportMethod(BaseDbManager dbmanager)
         {
-            sqlmgr = dbmanager;
+            sqlmgr = dbmanager;            
         }
         
         /// <summary>
@@ -31,7 +31,7 @@ namespace anvlib.Data.ExportTableMethods
         /// </summary>
         /// <param name="table"></param>
         /// <param name="additionaldata"></param>
-        public void Export(DataTable table, bool CaseSensivity)
+        public void Export(DataTable table, DataInsertMethod InsertMethod, bool CaseSensivity)
         {
             if (sqlmgr != null && sqlmgr.Connected)
             {
@@ -39,11 +39,11 @@ namespace anvlib.Data.ExportTableMethods
                 try
                 {
                     if (!sqlmgr.IsDBObjectExists(table.TableName, DataBaseObjects.table, CaseSensivity))
-                        sqlmgr.CreateTable(table, DataInsertMethod.FastIfPossible);
+                        sqlmgr.CreateTable(table, InsertMethod);
                     else
                     {
                         sqlmgr.DropTable(table.TableName);
-                        sqlmgr.CreateTable(table, DataInsertMethod.FastIfPossible);
+                        sqlmgr.CreateTable(table, InsertMethod);
                     }
 
                     if (ExportComplete != null)

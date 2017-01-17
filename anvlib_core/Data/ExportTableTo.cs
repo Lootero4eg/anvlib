@@ -5,6 +5,7 @@ using System.Text;
 using System.Data;
 
 using anvlib.Interfaces;
+using anvlib.Data.Database;
 
 namespace anvlib.Data
 {
@@ -19,10 +20,10 @@ namespace anvlib.Data
         /// <param name="ExportMethod"></param>
         /// <param name="table"></param>
         /// <param name="additionaldata">Здесь передаются такие параметры как имя файла или база данных в которую писать</param>
-        public static void Export(IExportTableMethod ExportMethod, DataTable table, bool CaseSensivity)
+        public static void Export(IExportTableMethod ExportMethod, DataTable table, DataInsertMethod InsertMethod, bool CaseSensivity)
         {
             if (ExportMethod != null)
-                ExportMethod.Export(table, CaseSensivity);
+                ExportMethod.Export(table, InsertMethod, CaseSensivity);
         }
     }
 }

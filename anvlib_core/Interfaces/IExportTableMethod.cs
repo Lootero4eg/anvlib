@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Data;
 
+using anvlib.Data.Database;
+
 namespace anvlib.Interfaces
 {
     public interface IExportTableMethod
@@ -12,7 +14,7 @@ namespace anvlib.Interfaces
         /// Экпорт таблицы
         /// </summary>
         /// <param name="table"></param>
-        void Export(DataTable table, bool CaseSensivity);
+        void Export(DataTable table, DataInsertMethod InsertMethod, bool CaseSensivity);
 
         /// <summary>
         /// Событие успешного выполнения экспорта

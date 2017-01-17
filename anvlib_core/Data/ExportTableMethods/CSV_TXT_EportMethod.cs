@@ -5,6 +5,7 @@ using System.Text;
 using System.Data;
 
 using anvlib.Data;
+using anvlib.Data.Database;
 using anvlib.Interfaces;
 
 namespace anvlib.Data.ExportTableMethods
@@ -49,7 +50,7 @@ namespace anvlib.Data.ExportTableMethods
         /// </summary>
         /// <param name="table"></param>
         /// <param name="additionaldata"></param>
-        public void Export(DataTable table, bool CaseSensivity)
+        public void Export(DataTable table, DataInsertMethod InsertMethod, bool CaseSensivity)
         {
             try
             {
