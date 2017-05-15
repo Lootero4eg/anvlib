@@ -41,7 +41,7 @@ namespace anvlib.Presenters
         //--будет небольшая потеря производительности, но компы вроде мощные. зато читабельность кода будет выше
         protected object GetControlByName(string ControlName, bool CaseSensivity)
         {
-            return ControlHelper.GetObjectByName(view_controls, ControlName, CaseSensivity);
+            return ControlHelper.GetControlByName(view_controls, ControlName, CaseSensivity);
         }
 
         //--будет небольшая потеря производительности, но компы вроде мощные. зато читабельность кода будет выше

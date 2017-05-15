@@ -6,11 +6,12 @@ using System.Windows.Forms;
 
 namespace anvlib.Controls.EventHandlers
 {
-    public static class KeyboardHandlers
+    public static class TextBoxesEventHandlers
     {
         public static void OnlyDigitsTextBox_KeyDownEventHandler(object sender, KeyEventArgs e)
         {
-            if (e.Shift || e.KeyData == Keys.Delete || e.KeyData == Keys.Back || e.KeyData == Keys.Left || e.KeyData == Keys.Right)
+            if (e.Shift || e.KeyData == Keys.Delete || e.KeyData == Keys.Back || e.KeyData == Keys.Left || e.KeyData == Keys.Right
+                || e.KeyData == Keys.Home || e.KeyData == Keys.End)
             {
                 e.SuppressKeyPress = false;
                 return;
@@ -86,6 +87,48 @@ namespace anvlib.Controls.EventHandlers
             }
             OnlyDigitsTextBox_KeyDownEventHandler(sender, e);
         }
+
+        #region Shift Insert, Delete, Control Insert
+
+        public static void DisableShiftInsert_KeyDownEventHandler(object sender, KeyEventArgs e)
+        {
+            if (e.Shift && e.KeyValue == 45)
+                e.SuppressKeyPress = true;
+        }
+
+        public static void DisableShiftDelete_KeyDownEventHandler(object sender, KeyEventArgs e)
+        {
+            if (e.Shift && e.KeyValue == 46)
+                e.SuppressKeyPress = true;
+        }
+
+        public static void DisableControlInsert_KeyDownEventHandler(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyValue == 45)
+                e.SuppressKeyPress = true;
+        }
+
+        #endregion
+
+        #region Control X,C,V
+        public static void DisableControlX_KeyDownEventHandler(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyValue == 88)
+                e.SuppressKeyPress = true;
+        }
+
+        public static void DisableControlC_KeyDownEventHandler(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyValue == 67)
+                e.SuppressKeyPress = true;
+        }
+
+        public static void DisableControlV_KeyDownEventHandler(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyValue == 86)
+                e.SuppressKeyPress = true;
+        }
+        #endregion
 
         private static bool IsValidFloatData(string fdata)
         {

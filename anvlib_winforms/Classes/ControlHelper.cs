@@ -44,26 +44,7 @@ namespace anvlib.Classes
                 }
             }
         }
-
-        public static object GetObjectByName(Control[] ctrls, string ctrlname, bool casesensivity)
-        {
-            for (int i = 0; i < ctrls.Length; i++)
-            {
-                if (casesensivity)
-                {
-                    if (ctrls[i].Name == ctrlname)
-                        return ctrls[i];
-                }
-                else
-                {
-                    if (ctrls[i].Name.ToLower() == ctrlname.ToLower())
-                        return ctrls[i];
-                }
-            }
-
-            return null;
-        }
-
+        
         public static Control GetControlByName(Control[] ctrls, string ctrlname, bool casesensivity)
         {
             for (int i = 0; i < ctrls.Length; i++)

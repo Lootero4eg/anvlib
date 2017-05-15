@@ -43,10 +43,6 @@
     <AssemblyOriginatorKeyFile>anvlib_winforms.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="anvlib_crypt, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f1eeb136ebb95dbb, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\anvlib_crypt\bin\Debug\anvlib_crypt.dll</HintPath>
-    </Reference>
     <Reference Include="envdte, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
@@ -76,9 +72,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\ConnectionFormSettings.cs" />
+    <Compile Include="Classes\ControlEventBinder.cs" />
     <Compile Include="Classes\ControlFiller.cs" />
     <Compile Include="Classes\ControlHelper.cs" />
     <Compile Include="Classes\DesignerVerbSite.cs" />
+    <Compile Include="Enums\ControlEventType.cs" />
     <Compile Include="Presenters\Classes\AdditionalViews.cs" />
     <Compile Include="Classes\PrintMessageSystems\MessageBoxPrintSystem.cs" />
     <Compile Include="Classes\TypedTreeViewDisplayMember.cs" />
@@ -90,7 +88,7 @@
     <Compile Include="Controls\CommonCheckedListBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\EventHandlers\KeyboardHandlers.cs" />
+    <Compile Include="Controls\EventHandlers\TextBoxesEventHandlers.cs" />
     <Compile Include="Controls\InputComboBox.cs" />
     <Compile Include="Controls\InputBox.cs" />
     <Compile Include="Controls\Designers\TypedTreeViewDesigner.cs" />
@@ -270,6 +268,12 @@
     <ProjectReference Include="..\anvlib_core\anvlib_core.csproj">
       <Project>{d151e305-4950-482c-a05c-34e71e003cdd}</Project>
       <Name>anvlib_core</Name>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\anvlib_crypt\anvlib_crypt.csproj">
+      <Project>{a3ac254b-91ba-4c9e-a44d-1ffdff89d12c}</Project>
+      <Name>anvlib_crypt</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
