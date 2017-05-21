@@ -64,6 +64,11 @@ namespace anvlib.Utilites
             return null;
         }
 
+        public static Process[] GetProcesses()
+        {
+            return Process.GetProcesses();
+        }
+
         /// <summary>
         /// Метод завершающий процесс по имени исполняемого файла
         /// </summary>
