@@ -7,7 +7,7 @@ using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
 using System.Reflection;
 
-using anvlib.Utilites;
+using anvlib.Utilities;
 
 namespace anvlib.Classes
 {  
@@ -283,7 +283,7 @@ namespace anvlib.Classes
         {
             TypedTreeViewDisplayMemberList res = new TypedTreeViewDisplayMemberList();
 #warning Надо сделать правильную проверку и работу с коллецкиями!!!
-            /*Type tp = anvlib.Utilites.TypeSystem.GetElementType(obj.GetType());
+            /*Type tp = anvlib.Utilities.TypeSystem.GetElementType(obj.GetType());
             if (tp != obj.GetType())
                 obj = Activator.CreateInstance(tp);*/
             if (parent == null)

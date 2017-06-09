@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Data;
-using anvlib.Utilites;
+using anvlib.Utilities;
 
 namespace anvlib.Data
 {

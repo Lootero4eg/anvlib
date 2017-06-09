@@ -5,7 +5,7 @@ using System.Text;
 using System.Diagnostics;
 using System.IO;
 
-namespace anvlib.Utilites
+namespace anvlib.Utilities
 {
     /// <summary>
     /// Вспомогательный класс для работы с процессами системы Windows

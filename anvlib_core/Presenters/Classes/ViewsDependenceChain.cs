@@ -67,7 +67,7 @@ namespace anvlib.Presenters.Classes
         {
             get
             {
-                return anvlib.Utilites.ObjectInspector.HasObjectDataSourceProperty(View);
+                return anvlib.Utilities.ObjectInspector.HasObjectDataSourceProperty(View);
             }
         }
 
@@ -78,7 +78,7 @@ namespace anvlib.Presenters.Classes
         {
             get
             {
-                return anvlib.Utilites.ObjectInspector.HasObjectDisplayMemberProperty(View);
+                return anvlib.Utilities.ObjectInspector.HasObjectDisplayMemberProperty(View);
             }
         }
 
@@ -91,7 +91,7 @@ namespace anvlib.Presenters.Classes
             if (View != null)
             {
                 if (HasDataSourceProperty)
-                    anvlib.Utilites.ObjectInspector.SetDataSource(View, datasource);
+                    anvlib.Utilities.ObjectInspector.SetDataSource(View, datasource);
             }
         }
 
@@ -104,7 +104,7 @@ namespace anvlib.Presenters.Classes
             if (View != null)
             {
                 if (HasDisplayMemberProperty)
-                    anvlib.Utilites.ObjectInspector.SetDisplayMember(View, displaymember);
+                    anvlib.Utilities.ObjectInspector.SetDisplayMember(View, displaymember);
             }
         }
 

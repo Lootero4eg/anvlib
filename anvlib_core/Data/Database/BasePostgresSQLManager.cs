@@ -208,12 +208,12 @@ namespace anvlib.Data.Database
             return null; ;
         }
 
-        public override void CreateTable(DataTable table, DataInsertMethod insert_method) 
+        public override void CreateTable(DataTable table, DataInsertMethod insert_method, bool PrepareTableForInsert) 
         {
             //insert_method = DataInsertMethod.Normal;
             if (Connected)
             {
-                base.CreateTable(table, insert_method);
+                base.CreateTable(table, insert_method, PrepareTableForInsert);
 
                 string sqlsc;
                 sqlsc = "CREATE TABLE " + table.TableName + "(";
@@ -281,7 +281,7 @@ namespace anvlib.Data.Database
                 if (_last_error == 0)//--Если табличка успешно создана, то надо ее заполнить       
                 {                    
                     if (insert_method == DataInsertMethod.Normal)
-                        InsertDataToDb(table, _parameters_prefix);
+                        InsertDataToDb(table, _parameters_prefix, PrepareTableForInsert);
                     if (insert_method == DataInsertMethod.FastIfPossible)
                     {
                         BeginTransaction();

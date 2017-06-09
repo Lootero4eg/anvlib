@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace anvlib.Utilites
+namespace anvlib.Utilities
 {
     public delegate void StartThreadingHandler();
 

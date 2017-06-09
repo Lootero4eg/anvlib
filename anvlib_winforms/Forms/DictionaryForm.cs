@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 using anvlib.Enums;
 using anvlib.Interfaces;
-using anvlib.Utilites;
+using anvlib.Utilities;
 
 namespace anvlib.Forms
 {

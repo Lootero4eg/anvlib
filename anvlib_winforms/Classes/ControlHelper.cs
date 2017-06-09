@@ -5,7 +5,7 @@ using System.Text;
 using System.Data;
 using System.Windows.Forms;
 
-using anvlib.Utilites;
+using anvlib.Utilities;
 
 namespace anvlib.Classes
 {

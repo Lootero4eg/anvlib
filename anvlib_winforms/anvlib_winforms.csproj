@@ -215,11 +215,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Utilites\NetAPI32.cs" />
-    <Compile Include="Utilites\RegistryUtils.cs" />
-    <Compile Include="Utilites\ShortcutManager.cs" />
-    <Compile Include="Utilites\UserAndGroupAuthentication.cs" />
-    <Compile Include="Utilites\WinFormsUtils.cs" />
+    <Compile Include="Utilities\NetAPI32.cs" />
+    <Compile Include="Utilities\RegistryUtils.cs" />
+    <Compile Include="Utilities\ShortcutManager.cs" />
+    <Compile Include="Utilities\UserAndGroupAuthentication.cs" />
+    <Compile Include="Utilities\WinFormsUtils.cs" />
     <Compile Include="zzzSamples_Reminders\DesignerSerialization.cs" />
     <Compile Include="zzzSamples_Reminders\IconSerialization.cs" />
   </ItemGroup>

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Data;
 
-namespace anvlib.Utilites
+namespace anvlib.Utilities
 {
     /// <summary>
     /// Конвертер из системных типов в тип базы данных.

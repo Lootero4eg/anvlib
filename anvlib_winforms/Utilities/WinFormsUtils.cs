@@ -6,7 +6,7 @@ using System.Drawing;
 
 using System.Windows.Forms;
 
-namespace anvlib.Utilites
+namespace anvlib.Utilities
 {
     /// <summary>
     /// Вспомогательный класс для работы с Windows Forms

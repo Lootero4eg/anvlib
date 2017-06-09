@@ -14,7 +14,7 @@ namespace anvlib.Interfaces
         /// Экпорт таблицы
         /// </summary>
         /// <param name="table"></param>
-        void Export(DataTable table, DataInsertMethod InsertMethod, bool CaseSensivity);
+        void Export(DataTable table, DataInsertMethod InsertMethod, bool CaseSensivity, bool PrepareTableForInsert);
 
         /// <summary>
         /// Событие успешного выполнения экспорта

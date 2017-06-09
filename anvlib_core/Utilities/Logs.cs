@@ -5,7 +5,7 @@ using System.Text;
 
 using System.IO;
 
-namespace anvlib.Utilites
+namespace anvlib.Utilities
 {
     public enum FileSizeExceededEnum { DisableWriting, ThrowException, RewriteFile }
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace anvlib.Utilites
+namespace anvlib.Utilities
 {    
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
     public struct FILE_INFO_3

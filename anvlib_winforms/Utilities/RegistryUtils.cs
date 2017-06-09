@@ -5,7 +5,7 @@ using System.Text;
 
 using Microsoft.Win32;
 
-namespace anvlib.Utilites
+namespace anvlib.Utilities
 {
     /// <summary>
     /// Вспомогательный класс для параметров реестра Windows

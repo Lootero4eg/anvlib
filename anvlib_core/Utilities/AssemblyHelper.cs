@@ -7,7 +7,7 @@ using System.Reflection;
 
 //using anvlib.Controls;
 
-namespace anvlib.Utilites
+namespace anvlib.Utilities
 {
     /// <summary>
     /// Надо переделать почти все методы, с использованием доплнитлеьного домена вместо Assembly.Load

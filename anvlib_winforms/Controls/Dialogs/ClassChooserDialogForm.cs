@@ -145,14 +145,14 @@ namespace anvlib.Controls.Dialogs
 
                             ai.AssemblyName = asm.FullName.Substring(0, asm.FullName.IndexOf(","));
 
-                            foreach (var ns in anvlib.Utilites.AssemblyHelper.GetAssemblyNamespaces(asm))
+                            foreach (var ns in anvlib.Utilities.AssemblyHelper.GetAssemblyNamespaces(asm))
                             {
                                 Namespace nspace = new Namespace();
                                 if (ai.AssemblyName != ns)
                                     nspace.NamespaceName = ns;
                                 else
                                     nspace.NamespaceName = "<Root Namespace>";
-                                nspace.Classes.AddRange(anvlib.Utilites.AssemblyHelper.GetAssemblyClasses(asm, ns));
+                                nspace.Classes.AddRange(anvlib.Utilities.AssemblyHelper.GetAssemblyClasses(asm, ns));
                                 if (nspace.Classes.Count > 0)
                                     ai.Namespaces.Add(nspace);
                             }

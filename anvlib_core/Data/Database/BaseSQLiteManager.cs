@@ -139,11 +139,11 @@ namespace anvlib.Data.Database
         /// <param name="table">Таблица</param>
         /// <param name="insert_method">В этой СУБД этот параметр не работает, поэтому можно внести любое значение</param>
         [Experimental]
-        public override void CreateTable(DataTable table, DataInsertMethod insert_method)
+        public override void CreateTable(DataTable table, DataInsertMethod insert_method, bool PrepareTableForInsert)
         {
             if (Connected)
             {
-                base.CreateTable(table, insert_method);
+                base.CreateTable(table, insert_method, PrepareTableForInsert);
 
                 string sqlsc;
                 sqlsc = "CREATE TABLE " + table.TableName + "(";
@@ -175,8 +175,8 @@ namespace anvlib.Data.Database
                     else
                         sqlsc += " text";
 
-                    if (table.Columns[i].AutoIncrement)
-                        sqlsc += " AUTOINCREMENT(" + table.Columns[i].AutoIncrementSeed.ToString() + "," + table.Columns[i].AutoIncrementStep.ToString() + ")";
+                    /*if (table.Columns[i].AutoIncrement)
+                        sqlsc += " AUTOINCREMENT(" + table.Columns[i].AutoIncrementSeed.ToString() + "," + table.Columns[i].AutoIncrementStep.ToString() + ")";*/
                     if (!table.Columns[i].AllowDBNull)
                         sqlsc += " NOT NULL";
                     if (table.Columns[i].DefaultValue != null && table.Columns[i].DefaultValue != DBNull.Value)
@@ -203,11 +203,11 @@ namespace anvlib.Data.Database
                 if (_last_error == 0)//--Если табличка успешно создана, то надо ее заполнить 
                 {
                     if (insert_method == DataInsertMethod.Normal)
-                        InsertDataToDb(table, _parameters_prefix);
+                        InsertDataToDb(table, _parameters_prefix, PrepareTableForInsert);
                     if (insert_method == DataInsertMethod.FastIfPossible)
                     {
                         BeginTransaction();
-                        InsertDataToDb(table, _parameters_prefix);
+                        InsertDataToDb(table, _parameters_prefix, PrepareTableForInsert);
                         CommitTransaction();
                     }
                 }
@@ -217,7 +217,7 @@ namespace anvlib.Data.Database
                 if (MessagePrinter != null)
                     MessagePrinter.PrintMessage(ErrorsManager.Messages.NotConnectedMsg, ErrorsManager.Messages.ErrorMsg, 1, 1);
             }
-        }
+        }        
 
         /// <summary>
         /// Метод, удаляющий таблицу из базы данных
@@ -244,7 +244,7 @@ namespace anvlib.Data.Database
                 }
                 else
                 {
-                    sql = string.Format("select 1 from sys.objects where type='{0}' and lower(name)=lower('{1}')",
+                    sql = string.Format("select 1 from sqlite_master where type='{0}' and lower(name)=lower('{1}')",
                             GetObjectTypeCode(obj_type),
                             obj_name);
                 }

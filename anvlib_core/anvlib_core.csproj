@@ -134,20 +134,20 @@
     <Compile Include="Presenters\Classes\PresentersEvents.cs" />
     <Compile Include="Presenters\Classes\ViewsDependenceChain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilites\ArgsParser.cs" />
-    <Compile Include="Utilites\AssemblyHelper.cs" />
-    <Compile Include="Utilites\ConfigManager.cs" />
-    <Compile Include="Utilites\StringsParser.cs" />
-    <Compile Include="Utilites\SystemTypeToDbTypeConverter.cs" />
-    <Compile Include="Utilites\DbTypeToSystemTypeConverter.cs" />
-    <Compile Include="Utilites\DigitToTextConverter.cs" />
-    <Compile Include="Utilites\IOUtils.cs" />
-    <Compile Include="Utilites\Logs.cs" />
-    <Compile Include="Utilites\ObjectInspector.cs" />
-    <Compile Include="Utilites\ProcessManager.cs" />
-    <Compile Include="Utilites\ThreadsManager.cs" />
-    <Compile Include="Utilites\TypesHelper.cs" />
-    <Compile Include="Utilites\TypeSystem.cs" />
+    <Compile Include="Utilities\ArgsParser.cs" />
+    <Compile Include="Utilities\AssemblyHelper.cs" />
+    <Compile Include="Utilities\ConfigManager.cs" />
+    <Compile Include="Utilities\StringsParser.cs" />
+    <Compile Include="Utilities\SystemTypeToDbTypeConverter.cs" />
+    <Compile Include="Utilities\DbTypeToSystemTypeConverter.cs" />
+    <Compile Include="Utilities\DigitToTextConverter.cs" />
+    <Compile Include="Utilities\IOUtils.cs" />
+    <Compile Include="Utilities\Logs.cs" />
+    <Compile Include="Utilities\ObjectInspector.cs" />
+    <Compile Include="Utilities\ProcessManager.cs" />
+    <Compile Include="Utilities\ThreadsManager.cs" />
+    <Compile Include="Utilities\TypesHelper.cs" />
+    <Compile Include="Utilities\TypeSystem.cs" />
     <Compile Include="Xml\XmlClassManager.cs" />
   </ItemGroup>
   <ItemGroup>

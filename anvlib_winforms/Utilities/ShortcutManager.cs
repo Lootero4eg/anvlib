@@ -5,7 +5,7 @@ using System.Text;
 
 using System.Runtime.InteropServices;
 
-namespace anvlib.Utilites
+namespace anvlib.Utilities
 {
     /// <summary>
     /// Вспомогательный класс для работы с ярлыками Windows

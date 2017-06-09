@@ -206,7 +206,7 @@ namespace anvlib.Data.Database
         /// </summary>
         /// <param name="table">Таблица в формате DataTable</param>
         [Experimental]
-        public virtual void CreateTable(DataTable table, DataInsertMethod insert_method)
+        public virtual void CreateTable(DataTable table, DataInsertMethod insert_method, bool PrepareTableForInsert)
         {
             if (string.IsNullOrEmpty(table.TableName))
             {
@@ -354,21 +354,24 @@ namespace anvlib.Data.Database
         protected abstract void DeleteLogin(string LoginName, string AdditionalOptions);
         
         //--пока этот метод вызывается из CreateTable, проверку на _conn.Open делать не надо, но как только будет отдельно, надо будет делать!
-        protected virtual void InsertDataToDb(DataTable table, string parameters_prefix)
+        protected virtual void InsertDataToDb(DataTable table, string parameters_prefix, bool PrepareTableForInsert)
         {
             string insert_sql = string.Format("insert into {0} values(", table.TableName);
             Array insert_params = new DbParameter[table.Columns.Count];
             for (int i = 0; i < table.Columns.Count; i++)
             {
                 insert_sql = string.Format("{0}{2}{1}", insert_sql, table.Columns[i].ColumnName + (i + 1 != table.Columns.Count ? "," : ")"), parameters_prefix);
-                DbParameter par = CreateParameter(string.Format("{1}{0}", table.Columns[i].ColumnName, parameters_prefix), Utilites.SystemTypeToDbTypeConverter.Convert(table.Columns[i].DataType), table.Columns[i].MaxLength);
+                DbParameter par = CreateParameter(string.Format("{1}{0}", table.Columns[i].ColumnName, parameters_prefix), Utilities.SystemTypeToDbTypeConverter.Convert(table.Columns[i].DataType), table.Columns[i].MaxLength);
                 par.SourceColumn = table.Columns[i].ColumnName;
                 insert_params.SetValue(par, i);
             }
             
-            _DA = CreateDataAdapter("");
+            _DA = CreateDataAdapter("");            
             var ins_cmd = CreateCommand(insert_sql);
             ins_cmd.Parameters.AddRange(insert_params);
+
+            if (PrepareTableForInsert)
+                MarkTableRowsAsAdded(table);
 
             try
             {
@@ -412,17 +415,34 @@ namespace anvlib.Data.Database
             }
                             
             _DA = CreateDataAdapter(sql);
-            _DA.FillLoadOption = LoadOption.Upsert;//--Важднейшая опция, после которой можно вставить эту таблицу в другую базу     
+            _DA.FillLoadOption = LoadOption.Upsert;//--Важнейшая опция, после которой можно вставить эту таблицу в другую базу     
             _DA.FillSchema(_dt, SchemaType.Source);
-            PrepareTableSchemeBeforeFill(_dt);
-            _DA.Fill(_dt);
+            PrepareTableSchemeBeforeFill(_dt, with_primary_key, with_max_string_length, with_default_values, CaseSensivity);
+            _DA.Fill(_dt);          
 
-#warning перенести код ниже в PrepareTableSchemeBeforeFill
+            return _dt;
+        }
+
+        protected abstract DataTable GetTablePrimaryKey(DataTable table, bool CaseSensivity);
+
+        internal virtual DbColumnInformation GetDbColumnInformation(string tablename, string columnname, bool CaseSensivity)
+        {
+            DbColumnInformation res = new DbColumnInformation();
+
+            res.MaxLength = 50;
+            res.IsNullable = true;
+            res.AdditionalInfo = "default";
+
+            return res;
+        }
+
+        internal virtual void PrepareTableSchemeBeforeFill(DataTable table, bool with_primary_key, bool with_max_string_length, bool with_default_values, bool CaseSensivity) 
+        {
             //--описание колонок 
-            foreach (DataColumn col in _dt.Columns)
-            {                
-                var col_info = GetDbColumnInformation(tablename, col.ColumnName, CaseSensivity);
-                if (col_info.AdditionalInfo!=null && col_info.AdditionalInfo.ToString() != "default")
+            foreach (DataColumn col in table.Columns)
+            {
+                var col_info = GetDbColumnInformation(table.TableName, col.ColumnName, CaseSensivity);
+                if (col_info.AdditionalInfo != null && col_info.AdditionalInfo.ToString() != "default")
                     col.AllowDBNull = col_info.IsNullable;
                 if (with_max_string_length)
                 {
@@ -449,25 +469,15 @@ namespace anvlib.Data.Database
             }
 
             if (with_primary_key)
-                _dt = GetTablePrimaryKey(_dt, CaseSensivity);
-
-            return _dt;
+                table = GetTablePrimaryKey(table, CaseSensivity);
         }
 
-        protected abstract DataTable GetTablePrimaryKey(DataTable table, bool CaseSensivity);
-
-        internal virtual DbColumnInformation GetDbColumnInformation(string tablename, string columnname, bool CaseSensivity)
+        internal void MarkTableRowsAsAdded(DataTable table)
         {
-            DbColumnInformation res = new DbColumnInformation();
-
-            res.MaxLength = 50;
-            res.IsNullable = true;
-            res.AdditionalInfo = "default";
-
-            return res;
+            table.AcceptChanges();
+            foreach (DataRow dr in table.Rows)
+                dr.SetAdded();
         }
-
-        internal virtual void PrepareTableSchemeBeforeFill(DataTable table) {}        
 
         #endregion
     }

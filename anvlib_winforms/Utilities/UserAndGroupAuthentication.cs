@@ -5,7 +5,7 @@ using System.Text;
 
 using System.Security.Principal;
 
-namespace anvlib.Utilites
+namespace anvlib.Utilities
 {
     public static class UserAndGroupAuthentication
     {

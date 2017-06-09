@@ -269,7 +269,7 @@ namespace anvlib.Classes
                                 if (Leaf.ImageIndexByFieldName.IndexOf('.') == -1)
                                     im_idx = item.GetType().GetProperty(Leaf.ImageIndexByFieldName).GetValue(item, null);
                                 else
-                                    im_idx = anvlib.Utilites.ObjectInspector.GetObjectPropertyValueRecursive(item, Leaf.ImageIndexByFieldName);
+                                    im_idx = anvlib.Utilities.ObjectInspector.GetObjectPropertyValueRecursive(item, Leaf.ImageIndexByFieldName);
                                 if (im_idx != null && im_idx.GetType() == typeof(int))
                                 {
                                     mnode.ImageIndex = (int)im_idx;

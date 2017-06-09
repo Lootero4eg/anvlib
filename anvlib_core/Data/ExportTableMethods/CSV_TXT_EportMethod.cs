@@ -50,7 +50,7 @@ namespace anvlib.Data.ExportTableMethods
         /// </summary>
         /// <param name="table"></param>
         /// <param name="additionaldata"></param>
-        public void Export(DataTable table, DataInsertMethod InsertMethod, bool CaseSensivity)
+        public void Export(DataTable table, DataInsertMethod InsertMethod, bool CaseSensivity, bool PrepareTableForInsert)
         {
             try
             {

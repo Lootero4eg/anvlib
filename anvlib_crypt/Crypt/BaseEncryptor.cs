@@ -27,13 +27,14 @@ namespace anvlib.Crypt
         /// <returns></returns>
         public static byte[] Encrypt(string text, string KEY, string IV)
         {
-            byte[] key = ASCIIEncoding.ASCII.GetBytes(KEY); 
-            byte[] key2 = ASCIIEncoding.ASCII.GetBytes(IV);
+            byte[] key = UTF8Encoding.UTF8.GetBytes(KEY); 
+            byte[] key2 = UTF8Encoding.UTF8.GetBytes(IV);
             T Algorithm = new T(); 
             (Algorithm as SymmetricAlgorithm).Key = key;
             (Algorithm as SymmetricAlgorithm).IV = key2;
             ICryptoTransform AlgorithmCrypto = (Algorithm as SymmetricAlgorithm).CreateEncryptor();
-            byte[] pass = AlgorithmCrypto.TransformFinalBlock(ASCIIEncoding.ASCII.GetBytes(text), 0, text.Length);
+            byte[] bytesForEncryption = Encoding.UTF8.GetBytes(text);
+            byte[] pass = AlgorithmCrypto.TransformFinalBlock(bytesForEncryption, 0, bytesForEncryption.Length);
 
             return pass;
         }
@@ -50,8 +51,8 @@ namespace anvlib.Crypt
             if (text == null)
                 return string.Empty;
 
-            byte[] key = ASCIIEncoding.ASCII.GetBytes(KEY);
-            byte[] key2 = ASCIIEncoding.ASCII.GetBytes(IV);
+            byte[] key = UTF8Encoding.UTF8.GetBytes(KEY);
+            byte[] key2 = UTF8Encoding.UTF8.GetBytes(IV);
             T Algorithm = new T();
             (Algorithm as SymmetricAlgorithm).Key = key;
             (Algorithm as SymmetricAlgorithm).IV = key2;
@@ -59,7 +60,7 @@ namespace anvlib.Crypt
 
             byte[] recoveredpass = AlgorithmDecr.TransformFinalBlock(text, 0, text.Length);
 
-            return ASCIIEncoding.ASCII.GetString(recoveredpass);
+            return Encoding.UTF8.GetString(recoveredpass);
         }
 
         /// <summary>

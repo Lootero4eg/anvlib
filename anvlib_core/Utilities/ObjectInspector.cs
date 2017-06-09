@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace anvlib.Utilites
+namespace anvlib.Utilities
 {
     public static class ObjectInspector
     {

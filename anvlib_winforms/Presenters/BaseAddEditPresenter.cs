@@ -5,7 +5,7 @@ using System.Text;
 
 using System.Windows.Forms;
 using anvlib.Classes;
-using anvlib.Utilites;
+using anvlib.Utilities;
 
 namespace anvlib.Presenters
 {

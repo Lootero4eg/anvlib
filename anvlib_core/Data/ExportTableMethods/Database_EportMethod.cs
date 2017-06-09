@@ -31,7 +31,7 @@ namespace anvlib.Data.ExportTableMethods
         /// </summary>
         /// <param name="table"></param>
         /// <param name="additionaldata"></param>
-        public void Export(DataTable table, DataInsertMethod InsertMethod, bool CaseSensivity)
+        public void Export(DataTable table, DataInsertMethod InsertMethod, bool CaseSensivity, bool PrepareTableForInsert)
         {
             if (sqlmgr != null && sqlmgr.Connected)
             {
@@ -39,11 +39,11 @@ namespace anvlib.Data.ExportTableMethods
                 try
                 {
                     if (!sqlmgr.IsDBObjectExists(table.TableName, DataBaseObjects.table, CaseSensivity))
-                        sqlmgr.CreateTable(table, InsertMethod);
+                        sqlmgr.CreateTable(table, InsertMethod, PrepareTableForInsert);
                     else
                     {
                         sqlmgr.DropTable(table.TableName);
-                        sqlmgr.CreateTable(table, InsertMethod);
+                        sqlmgr.CreateTable(table, InsertMethod, PrepareTableForInsert);
                     }
 
                     if (ExportComplete != null)

@@ -5,7 +5,7 @@ using System.Text;
 
 using System.IO;
 
-namespace anvlib.Utilites
+namespace anvlib.Utilities
 {
     /// <summary>
     /// Вспомогательный класс для работы с файлами конфигов (.conf, .ini, .cfg)
