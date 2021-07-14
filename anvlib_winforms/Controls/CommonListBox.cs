@@ -29,6 +29,6 @@ namespace anvlib.Controls
             }
          
             base.OnMouseDown(e);
-        }        
+        }
     }
 }
