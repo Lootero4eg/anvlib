@@ -35,7 +35,7 @@ namespace anvlib.Interfaces
         /// <summary>
         /// Считать полученный DialogResult, по закрытию формы
         /// </summary>
-        System.Windows.Forms.DialogResult DialogResult { get; }        
+        System.Windows.Forms.DialogResult DialogResult { get; }
 
         void SetFormState(AddEditFormState state);
     }

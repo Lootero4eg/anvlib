@@ -30,8 +30,8 @@
         {
             this.ProgressStatus = new System.Windows.Forms.ProgressBar();
             this.ProgressTask = new System.Windows.Forms.Label();
-            this.shapeContainer1 = new Microsoft.VisualBasic.PowerPacks.ShapeContainer();
-            this.rectangleShape1 = new Microsoft.VisualBasic.PowerPacks.RectangleShape();
+            /*this.shapeContainer1 = new Microsoft.VisualBasic.PowerPacks.ShapeContainer();
+            this.rectangleShape1 = new Microsoft.VisualBasic.PowerPacks.RectangleShape();*/
             this.SuspendLayout();
             // 
             // ProgressStatus
@@ -50,20 +50,20 @@
             // 
             // shapeContainer1
             // 
-            this.shapeContainer1.Location = new System.Drawing.Point(0, 0);
+            /*this.shapeContainer1.Location = new System.Drawing.Point(0, 0);
             this.shapeContainer1.Margin = new System.Windows.Forms.Padding(0);
             this.shapeContainer1.Name = "shapeContainer1";
             this.shapeContainer1.Shapes.AddRange(new Microsoft.VisualBasic.PowerPacks.Shape[] {
             this.rectangleShape1});
             this.shapeContainer1.Size = new System.Drawing.Size(378, 62);
             this.shapeContainer1.TabIndex = 2;
-            this.shapeContainer1.TabStop = false;
+            this.shapeContainer1.TabStop = false;*/
             // 
             // rectangleShape1
             // 
-            this.rectangleShape1.Location = new System.Drawing.Point(0, 0);
+            /*this.rectangleShape1.Location = new System.Drawing.Point(0, 0);
             this.rectangleShape1.Name = "rectangleShape1";
-            this.rectangleShape1.Size = new System.Drawing.Size(377, 59);
+            this.rectangleShape1.Size = new System.Drawing.Size(377, 59);*/
             // 
             // ProgressForm
             // 
@@ -72,7 +72,7 @@
             this.ClientSize = new System.Drawing.Size(378, 62);
             this.Controls.Add(this.ProgressTask);
             this.Controls.Add(this.ProgressStatus);
-            this.Controls.Add(this.shapeContainer1);
+            //this.Controls.Add(this.shapeContainer1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "ProgressForm";
             this.ShowInTaskbar = false;
@@ -86,7 +86,7 @@
 
         private System.Windows.Forms.ProgressBar ProgressStatus;
         private System.Windows.Forms.Label ProgressTask;
-        private Microsoft.VisualBasic.PowerPacks.ShapeContainer shapeContainer1;
-        private Microsoft.VisualBasic.PowerPacks.RectangleShape rectangleShape1;
+        /*private Microsoft.VisualBasic.PowerPacks.ShapeContainer shapeContainer1;
+        private Microsoft.VisualBasic.PowerPacks.RectangleShape rectangleShape1;*/
     }
 }

@@ -13,7 +13,7 @@ namespace anvlib_reports.Classes
     public static class ExcelWriter
     {
         private static Excel.Application excelApp = new Excel.Application();
-        private static Excel._Worksheet workSheet;        
+        private static Excel._Worksheet workSheet;
 
         /// <summary>
         /// Текущая ячейка на открытом или созданном листе
@@ -70,7 +70,7 @@ namespace anvlib_reports.Classes
                 excelApp.Visible = true;
             else
                 excelApp.Visible = false;
-            excelApp.Workbooks.Add();            
+            excelApp.Workbooks.Add();
             workSheet = excelApp.ActiveSheet;
             if (File.Exists(filename))
                 if (overwrite)
@@ -101,8 +101,8 @@ namespace anvlib_reports.Classes
         /// <param name="value">Записываемое значение</param>
         public static void WriteToCell(Cell cell, object value)
         {
-            if (workSheet != null)            
-                workSheet.Cells[cell.Row, cell.Column] = value;                            
+            if (workSheet != null)
+                workSheet.Cells[cell.Row, cell.Column] = value;
         }
 
         public static void WriteToCell(string range, object value)
